@@ -1,0 +1,297 @@
+@font-face { font-family: 'Big Shoulders Display'; font-style: normal; font-weight: 700; font-display: swap; src: url('../fonts/big-shoulders-display-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Big Shoulders Display'; font-style: normal; font-weight: 800; font-display: swap; src: url('../fonts/big-shoulders-display-latin-800-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Hanken Grotesk'; font-style: normal; font-weight: 400; font-display: swap; src: url('../fonts/hanken-grotesk-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Hanken Grotesk'; font-style: normal; font-weight: 500; font-display: swap; src: url('../fonts/hanken-grotesk-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Hanken Grotesk'; font-style: normal; font-weight: 600; font-display: swap; src: url('../fonts/hanken-grotesk-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Hanken Grotesk'; font-style: normal; font-weight: 700; font-display: swap; src: url('../fonts/hanken-grotesk-latin-700-normal.woff2') format('woff2'); }
+/* Direction artistique « Alpenglow » — le trail en montagne, au lever du jour */
+:root {
+  color-scheme: dark;
+  --nuit: #0d1821;          /* fond : bleu nuit d'altitude */
+  --roche: #15232e;         /* surfaces */
+  --roche-2: #1c2d3a;       /* surfaces secondaires */
+  --arete: rgba(159, 196, 214, 0.12); /* lignes fines */
+  --neige: #eef3f6;         /* texte */
+  --brume: #a3b6c4;         /* texte secondaire */
+  --brume-2: #6f8595;       /* texte tertiaire */
+  --glacier: #6fcfe0;       /* données, actions */
+  --alpenglow: #ff8f6b;     /* effort, objectifs */
+  --alpenglow-2: #ffc2a8;
+  --good: #7fd6a3; --warn: #f4c46b; --bad: #ff7a85;
+  --display: 'Big Shoulders Display', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --body: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --contours: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 400%22 preserveAspectRatio=%22xMidYMid slice%22%3E%3Cg fill=%22none%22 stroke=%22%239FC4D6%22 stroke-width=%220.8%22 stroke-opacity=%220.16%22%3E%3Cpath d=%22M30 400 L28 397 L26 395 L24 392 L22 390 L20 387 L18 385 L15 382 L13 379 L10 376 L8 373 L5 370 L3 367 L0 365%22/%3E%3Cpath d=%22M55 400 L53 397 L50 394 L48 391 L45 388 L43 385 L41 382 L38 380 L36 377 L34 375 L32 372 L30 370 L28 367 L25 364 L23 361 L20 358 L18 355 L15 352 L13 350 L10 347 L8 345 L5 342 L3 340 L1 337%22/%3E%3Cpath d=%22M77 400 L75 397 L73 395 L70 391 L68 388 L65 385 L63 382 L61 380 L59 377 L57 375 L55 372 L53 369 L50 366 L48 363 L45 360 L43 357 L41 355 L38 352 L36 350 L34 347 L32 345 L30 342 L27 340 L25 337 L23 335 L20 332 L18 329 L15 327 L13 324 L10 322 L8 319 L5 317 L3 314%22/%3E%3Cpath d=%22M98 400 L96 397 L94 395 L92 392 L90 390 L88 387 L85 384 L83 381 L80 377 L78 375 L76 372 L74 370 L72 367 L70 365 L68 362 L65 358 L63 355 L60 352 L58 350 L56 347 L54 345 L52 342 L50 340 L48 337 L45 334 L43 332 L40 329 L38 326 L35 323 L33 321 L30 318 L28 316 L25 313 L23 311 L20 308 L18 306 L15 304 L13 301 L10 299 L8 297 L5 294 L2 292%22/%3E%3Cpath d=%22M118 400 L116 397 L114 395 L112 392 L110 390 L108 387 L105 384 L103 381 L100 377 L98 375 L96 372 L94 370 L93 367 L90 365 L88 361 L85 358 L83 355 L81 352 L79 350 L77 347 L75 345 L73 342 L70 339 L68 336 L65 333 L63 330 L60 327 L58 325 L56 322 L53 319 L51 317 L49 314 L46 312 L44 309 L41 307 L39 304 L36 302 L34 299 L31 297 L28 294 L26 292 L23 289 L20 287 L18 285 L15 283 L13 281 L10 279 L8 277 L5 274 L1 272%22/%3E%3Cpath d=%22M138 400 L136 397 L134 395 L132 392 L130 390 L128 387 L126 385 L123 382 L121 378 L118 375 L116 372 L114 370 L112 367 L110 365 L108 362 L105 359 L103 356 L100 352 L98 350 L96 347 L94 345 L92 342 L90 339 L88 336 L85 333 L83 330 L80 327 L78 325 L76 322 L74 319 L72 317 L70 314 L68 312 L65 309 L63 307 L60 304 L58 301 L55 299 L53 296 L50 294 L48 291 L45 289 L43 287 L40 284 L37 282 L35 279 L32 277 L29 274 L25 272 L23 269 L20 267 L18 265 L15 264 L12 262 L9 259 L6 257 L3 254 L0 253%22/%3E%3Cpath d=%22M158 400 L156 397 L154 395 L152 392 L149 390 L147 387 L145 385 L143 382 L141 380 L138 376 L136 373 L133 370 L131 367 L129 365 L127 362 L125 360 L123 357 L121 354 L118 351 L115 347 L113 345 L112 342 L110 340 L108 337 L105 334 L103 331 L100 328 L98 325 L96 322 L94 319 L92 317 L90 314 L88 312 L85 309 L83 306 L80 303 L78 300 L75 297 L73 295 L70 292 L68 289 L65 287 L63 284 L60 282 L58 280 L55 277 L53 275 L50 273 L48 271 L45 269 L43 266 L40 264 L37 262 L33 259 L30 257 L28 255 L25 253 L23 251 L20 249 L16 247 L13 244 L10 243 L8 241 L5 239 L1 236%22/%3E%3Cpath d=%22M180 400 L177 397 L174 395 L172 392 L169 390 L167 387 L165 385 L162 382 L160 380 L158 377 L156 375 L153 372 L151 368 L148 365 L146 362 L144 360 L142 357 L140 355 L138 352 L136 349 L133 346 L131 342 L128 340 L127 337 L125 335 L123 332 L121 329 L118 326 L115 322 L113 319 L111 317 L110 314 L108 312 L105 309 L103 306 L100 303 L98 300 L95 297 L93 294 L91 292 L89 289 L87 287 L84 284 L82 282 L79 279 L77 277 L74 274 L72 272 L69 269 L66 267 L63 264 L61 262 L58 259 L55 257 L53 255 L50 253 L48 251 L45 249 L41 247 L38 244 L35 242 L33 241 L30 239 L26 236 L23 234 L20 233 L18 231 L14 229 L10 226 L8 225 L5 223 L2 221%22/%3E%3Cpath d=%22M203 400 L200 397 L197 395 L194 392 L191 390 L188 388 L186 385 L183 383 L181 380 L178 378 L176 375 L173 372 L171 370 L169 367 L167 365 L165 362 L163 360 L161 357 L158 354 L156 351 L153 348 L151 345 L149 342 L147 340 L145 337 L143 334 L141 331 L138 327 L136 325 L134 322 L132 319 L131 317 L128 313 L126 310 L123 307 L121 304 L119 302 L118 299 L115 297 L113 293 L110 290 L108 287 L105 284 L103 282 L101 279 L99 277 L97 274 L94 272 L92 269 L89 267 L87 264 L84 262 L81 259 L79 257 L76 254 L73 252 L70 250 L68 248 L65 246 L63 244 L60 242 L56 239 L53 237 L50 235 L48 233 L45 231 L41 229 L38 227 L35 225 L33 224 L28 221 L25 220 L23 218 L19 216 L15 214 L13 213 L10 211 L6 209 L3 207 L0 206%22/%3E%3Cpath d=%22M231 400 L226 397 L223 396 L221 394 L218 392 L215 390 L212 387 L208 385 L206 383 L203 381 L201 379 L198 376 L196 374 L193 371 L191 369 L188 366 L186 364 L183 361 L181 358 L178 355 L176 352 L174 350 L172 347 L170 345 L168 342 L166 339 L163 336 L161 332 L159 330 L157 327 L155 325 L153 322 L151 318 L148 315 L146 312 L144 309 L143 307 L141 304 L138 300 L136 297 L134 294 L132 292 L130 289 L128 286 L126 283 L123 280 L121 277 L119 274 L116 272 L114 269 L112 267 L110 264 L108 262 L105 259 L103 257 L100 254 L97 252 L95 249 L92 247 L89 244 L86 242 L83 239 L80 237 L78 235 L75 234 L72 231 L69 229 L65 227 L63 225 L60 224 L57 221 L53 219 L50 218 L48 216 L43 214 L40 212 L38 211 L34 209 L30 207 L28 205 L24 204 L20 202 L18 200 L14 199 L10 197 L8 195 L4 194 L0 191%22/%3E%3Cpath d=%22M600 387 L597 388 L595 390 L591 392 L587 395 L585 396 L582 397 L578 400%22/%3E%3Cpath d=%22M273 400 L269 399 L264 397 L261 397 L257 395 L254 394 L250 392 L246 390 L244 389 L240 387 L236 385 L233 384 L231 382 L228 380 L224 377 L221 375 L218 373 L216 371 L213 369 L211 367 L208 365 L206 362 L203 360 L201 357 L198 355 L196 352 L193 349 L191 346 L188 343 L186 340 L184 337 L182 335 L180 332 L178 330 L176 327 L173 323 L171 320 L169 317 L167 314 L166 312 L163 308 L161 305 L159 302 L157 299 L156 297 L153 293 L151 289 L149 287 L147 284 L146 282 L143 278 L141 274 L139 272 L137 269 L135 267 L133 264 L131 261 L128 258 L126 255 L123 252 L121 249 L118 247 L115 244 L113 242 L110 239 L108 237 L105 235 L103 233 L100 231 L98 229 L95 226 L91 224 L88 222 L85 220 L83 219 L79 216 L75 214 L73 213 L70 211 L66 209 L63 207 L60 206 L56 204 L53 202 L50 201 L45 199 L43 197 L40 196 L35 194 L33 193 L29 191 L25 189 L23 188 L18 186 L15 185 L13 184 L8 181 L5 180 L2 179%22/%3E%3Cpath d=%22M600 374 L597 376 L595 377 L591 380 L587 382 L585 384 L582 385 L578 387 L575 389 L572 390 L568 392 L565 394 L562 395 L557 397 L555 398 L550 399%22/%3E%3Cpath d=%22M404 400 L399 399 L394 399 L389 398 L384 398 L379 398 L377 397 L372 397 L367 397 L362 396 L356 396 L351 395 L346 395 L344 395 L339 395 L334 394 L329 394 L324 393 L319 393 L314 392 L311 392 L306 392 L301 391 L296 390 L294 390 L289 389 L284 387 L281 387 L276 385 L274 385 L269 383 L266 382 L261 380 L259 379 L255 377 L251 375 L249 374 L245 372 L241 370 L238 368 L236 366 L233 365 L230 362 L227 360 L224 357 L221 355 L218 352 L216 350 L213 347 L211 345 L209 342 L206 340 L204 337 L202 335 L200 332 L198 330 L196 327 L193 323 L191 320 L189 317 L187 314 L186 312 L183 308 L181 304 L179 302 L178 299 L176 296 L173 292 L172 289 L170 287 L168 284 L166 279 L164 277 L163 274 L161 271 L158 267 L156 264 L155 262 L153 259 L151 255 L148 252 L146 249 L144 247 L142 244 L140 242 L138 239 L136 236 L133 233 L131 231 L128 228 L126 226 L123 224 L120 221 L117 219 L114 216 L110 214 L108 213 L105 211 L102 209 L98 207 L95 205 L93 204 L88 201 L85 200 L83 199 L78 197 L75 195 L71 194 L68 192 L65 191 L60 189 L58 188 L53 186 L50 185 L47 184 L43 182 L40 181 L35 179 L33 178 L28 176 L25 175 L22 174 L18 172 L15 171 L10 169 L8 168 L4 166 L0 164%22/%3E%3Cpath d=%22M600 360 L597 362 L594 365 L591 367 L587 369 L585 371 L582 373 L578 375 L575 377 L572 378 L569 380 L565 382 L562 383 L558 385 L555 386 L551 387 L547 389 L543 390 L540 391 L535 392 L532 393 L527 394 L522 395 L519 395 L515 396 L510 396 L505 397 L500 397 L495 397 L490 397 L485 397 L479 397 L474 396 L469 396 L464 396 L459 395 L456 395 L452 395 L447 394 L442 393 L437 393 L434 392 L429 392 L424 391 L419 391 L414 390 L412 390 L407 389 L402 388 L397 388 L394 387 L389 387 L384 386 L379 386 L374 385 L370 385 L367 385 L362 384 L356 384 L351 383 L346 383 L344 382 L339 382 L334 381 L329 381 L324 380 L321 380 L316 379 L311 378 L307 377 L304 377 L299 376 L295 375 L291 374 L286 373 L284 372 L279 370 L276 369 L271 367 L269 366 L266 365 L261 363 L259 361 L256 360 L252 357 L249 355 L246 353 L244 352 L241 350 L238 347 L235 345 L232 342 L229 340 L227 337 L224 335 L222 332 L220 330 L218 327 L216 325 L213 322 L211 318 L208 315 L207 312 L205 309 L203 307 L201 303 L199 299 L197 297 L196 294 L193 290 L192 287 L190 284 L188 280 L186 277 L185 274 L183 270 L182 267 L180 264 L178 260 L177 257 L175 254 L173 250 L172 247 L170 244 L168 240 L166 236 L165 234 L163 231 L161 228 L158 224 L156 221 L154 219 L152 216 L149 214 L147 211 L144 209 L141 206 L138 204 L136 202 L133 201 L130 199 L126 196 L123 195 L120 194 L115 192 L113 191 L108 189 L105 188 L102 186 L98 185 L94 184 L90 182 L87 181 L83 180 L79 179 L75 177 L71 176 L68 175 L63 174 L60 173 L55 171 L53 170 L48 169 L45 168 L40 166 L38 165 L33 164 L30 163 L25 161 L23 160 L19 158 L15 157 L12 156 L8 154 L5 153 L0 151%22/%3E%3Cpath d=%22M228 0 L229 5 L230 10 L230 15 L230 20 L229 25 L229 30 L228 34 L228 38 L227 43 L226 48 L225 50 L224 55 L223 60 L223 63 L222 68 L221 72 L220 75 L219 81 L218 84 L218 88 L217 93 L216 98 L216 101 L215 106 L215 111 L215 116 L216 121 L216 123 L218 128 L219 131 L222 133 L226 136 L228 136 L233 137 L238 136 L241 136 L246 135 L250 133 L254 132 L256 131 L261 128 L264 127 L266 125 L269 123 L272 121 L276 118 L279 116 L281 113 L284 111 L286 108 L289 106 L291 103 L293 101 L295 98 L296 96 L299 92 L301 88 L302 86 L304 83 L306 78 L307 75 L309 72 L310 68 L311 65 L313 60 L314 58 L315 53 L316 49 L317 45 L319 40 L319 38 L321 33 L321 30 L323 25 L324 21 L325 18 L326 13 L328 10 L329 7 L331 3 L332 0%22/%3E%3Cpath d=%22M600 346 L597 348 L595 350 L592 352 L589 355 L586 357 L582 359 L580 361 L577 363 L574 365 L570 367 L567 368 L564 370 L560 372 L557 373 L553 375 L550 376 L546 377 L542 378 L537 380 L535 380 L530 382 L526 382 L522 383 L517 384 L512 385 L509 385 L505 385 L500 386 L495 386 L490 386 L485 386 L479 386 L474 385 L469 385 L467 385 L462 384 L457 384 L452 383 L447 383 L442 382 L439 382 L434 381 L429 381 L424 380 L422 380 L417 379 L412 378 L407 378 L404 377 L399 377 L394 376 L389 375 L386 375 L382 374 L377 374 L372 373 L367 372 L364 372 L359 371 L354 371 L349 370 L346 370 L341 369 L336 368 L331 367 L329 367 L324 366 L319 365 L316 365 L311 364 L306 362 L304 362 L299 360 L296 360 L291 358 L289 357 L284 355 L281 354 L277 352 L274 350 L271 349 L268 347 L264 345 L261 343 L259 341 L256 339 L253 337 L250 335 L247 332 L244 330 L242 327 L239 325 L237 322 L235 319 L233 317 L231 314 L228 311 L226 307 L224 304 L222 302 L221 299 L218 295 L217 292 L215 289 L213 285 L212 282 L211 279 L209 274 L208 272 L206 267 L205 264 L203 259 L203 257 L201 252 L200 249 L199 244 L198 242 L197 236 L196 231 L195 229 L194 224 L193 220 L193 216 L191 211 L191 208 L190 204 L188 199 L188 196 L186 191 L185 189 L183 186 L181 183 L178 180 L176 178 L172 176 L168 174 L165 174 L161 172 L156 171 L153 171 L148 170 L143 170 L138 169 L135 169 L131 168 L126 167 L121 167 L115 166 L113 166 L108 165 L103 164 L98 164 L95 163 L90 162 L85 162 L82 161 L78 160 L73 159 L69 158 L65 158 L60 156 L58 156 L53 155 L48 153 L45 153 L40 151 L38 151 L33 149 L30 148 L25 147 L22 146 L18 144 L15 143 L10 142 L8 141 L3 139 L0 138%22/%3E%3Cpath d=%22M196 0 L197 5 L197 10 L197 15 L197 20 L197 25 L196 30 L196 33 L195 38 L194 43 L193 46 L192 50 L191 55 L190 58 L189 63 L188 65 L186 70 L186 73 L184 78 L183 81 L181 85 L180 88 L178 91 L176 96 L175 98 L173 101 L171 105 L169 108 L167 111 L165 113 L163 116 L161 118 L158 121 L156 123 L153 126 L149 128 L146 131 L143 132 L141 133 L136 136 L133 137 L128 138 L126 139 L121 140 L116 141 L113 141 L108 142 L103 142 L98 143 L93 143 L88 143 L83 142 L78 142 L73 142 L68 141 L64 141 L60 140 L55 140 L50 139 L48 138 L43 137 L38 136 L35 135 L30 134 L27 133 L23 132 L19 131 L15 130 L11 128 L8 127 L4 126 L0 124%22/%3E%3Cpath d=%22M594 0 L595 3 L597 8 L598 10 L600 14%22/%3E%3Cpath d=%22M600 331 L597 333 L595 335 L592 338 L590 340 L587 342 L584 345 L580 347 L577 349 L575 351 L572 352 L568 355 L565 357 L562 358 L559 360 L555 362 L552 363 L547 365 L545 365 L540 367 L537 368 L532 369 L530 370 L525 371 L520 372 L517 372 L512 373 L507 374 L502 374 L497 374 L492 374 L487 374 L482 374 L477 374 L472 374 L467 374 L462 373 L457 373 L453 372 L449 372 L444 371 L439 371 L434 370 L432 370 L427 369 L422 368 L417 367 L414 367 L409 366 L404 366 L399 365 L397 364 L392 364 L387 363 L383 362 L379 362 L374 361 L369 360 L367 360 L362 359 L356 358 L352 357 L349 357 L344 356 L339 355 L336 354 L331 353 L328 352 L324 351 L319 350 L316 349 L311 348 L309 347 L304 345 L301 344 L296 342 L294 341 L291 340 L286 337 L284 336 L281 335 L277 332 L274 330 L271 328 L269 326 L266 324 L264 321 L261 319 L259 317 L256 314 L254 311 L251 308 L249 304 L247 302 L245 299 L244 297 L241 292 L240 289 L238 287 L236 282 L235 279 L233 275 L233 272 L231 267 L231 264 L230 259 L229 254 L228 251 L228 247 L228 242 L228 236 L228 233 L229 229 L230 224 L231 219 L232 216 L233 212 L235 209 L236 206 L238 202 L241 199 L242 196 L244 194 L246 191 L249 189 L251 186 L254 183 L256 181 L259 178 L261 176 L264 174 L267 171 L270 169 L272 166 L275 164 L278 161 L281 158 L284 156 L286 154 L289 151 L291 149 L294 147 L296 144 L299 141 L301 139 L304 136 L306 133 L308 131 L310 128 L313 126 L314 123 L316 121 L319 117 L321 114 L323 111 L325 108 L327 106 L329 102 L331 98 L332 96 L334 92 L336 88 L337 86 L339 82 L341 78 L342 75 L344 70 L344 68 L346 63 L347 60 L349 55 L350 53 L351 48 L352 45 L354 41 L355 38 L356 33 L358 30 L359 26 L360 23 L362 20 L364 15 L365 13 L367 9 L368 5 L370 3%22/%3E%3Cpath d=%22M171 0 L172 5 L172 10 L172 15 L172 20 L172 25 L171 30 L171 33 L170 38 L169 43 L168 45 L166 50 L166 53 L164 58 L163 60 L161 65 L160 68 L158 71 L156 75 L155 78 L153 81 L151 85 L148 88 L146 91 L144 93 L142 96 L140 98 L137 101 L135 103 L132 106 L128 108 L126 110 L123 112 L120 113 L115 115 L113 117 L108 118 L105 119 L100 121 L98 121 L93 122 L88 123 L85 123 L80 124 L75 124 L70 124 L65 124 L60 124 L55 124 L53 123 L48 123 L43 122 L38 121 L35 121 L30 120 L25 118 L23 118 L18 116 L15 116 L10 114 L8 113 L3 111 L0 110%22/%3E%3Cpath d=%22M568 0 L570 3 L572 6 L575 10 L576 13 L578 15 L580 19 L582 23 L583 25 L585 29 L586 33 L588 35 L590 40 L591 43 L592 47 L594 50 L595 53 L597 58 L598 60 L599 65%22/%3E%3Cpath d=%22M600 313 L597 316 L595 319 L592 321 L590 324 L587 326 L585 329 L582 331 L580 333 L577 335 L574 337 L570 340 L567 342 L565 343 L562 345 L557 347 L555 348 L552 350 L547 352 L545 353 L540 355 L537 355 L532 357 L530 358 L525 359 L521 360 L517 360 L512 361 L507 362 L502 362 L500 362 L495 363 L490 363 L485 363 L479 363 L474 363 L469 362 L467 362 L462 362 L457 361 L452 361 L447 360 L444 360 L439 359 L434 358 L429 358 L427 357 L422 356 L417 356 L412 355 L409 354 L404 353 L399 352 L397 352 L392 351 L387 350 L384 350 L379 349 L374 348 L371 347 L367 346 L362 345 L359 345 L354 343 L349 342 L346 342 L341 340 L339 340 L334 338 L331 337 L326 336 L323 335 L319 333 L316 332 L311 330 L309 328 L306 327 L301 325 L299 323 L296 321 L293 319 L290 317 L287 314 L284 312 L281 310 L279 307 L276 304 L274 302 L272 299 L270 297 L269 294 L266 290 L264 287 L263 284 L261 279 L260 277 L259 272 L258 269 L257 264 L257 259 L257 254 L257 249 L257 244 L258 239 L259 236 L260 231 L261 229 L263 224 L264 221 L266 218 L268 214 L270 211 L272 209 L274 206 L276 202 L279 199 L281 196 L283 194 L285 191 L288 189 L290 186 L292 184 L294 181 L297 179 L299 176 L301 174 L304 171 L306 168 L309 166 L311 163 L314 160 L316 157 L319 154 L321 151 L324 148 L326 146 L328 143 L330 141 L332 138 L334 136 L336 132 L339 129 L341 126 L343 123 L344 121 L346 117 L349 113 L351 111 L352 108 L354 105 L356 101 L358 98 L359 95 L361 91 L363 88 L364 85 L366 81 L367 78 L369 74 L371 70 L372 68 L374 63 L375 60 L377 57 L378 53 L379 50 L381 45 L382 43 L384 39 L386 35 L387 33 L389 28 L391 25 L392 23 L394 19 L396 15 L398 13 L400 10 L402 7 L404 4 L407 0%22/%3E%3Cpath d=%22M148 0 L149 5 L149 10 L149 15 L149 20 L149 25 L148 29 L147 33 L146 38 L146 40 L144 45 L143 48 L141 53 L140 55 L138 59 L136 63 L135 65 L133 68 L131 72 L128 75 L126 78 L123 81 L121 83 L118 86 L115 88 L113 90 L110 92 L108 93 L104 96 L100 97 L98 99 L93 101 L90 102 L85 103 L83 104 L78 105 L73 106 L70 106 L65 106 L60 107 L55 107 L50 107 L45 106 L40 106 L38 105 L33 105 L28 104 L25 103 L20 102 L15 101 L13 100 L8 98 L5 97 L1 96%22/%3E%3Cpath d=%22M529 0 L532 2 L535 4 L537 6 L540 8 L542 10 L545 13 L547 15 L550 18 L552 21 L555 24 L557 27 L559 30 L561 33 L563 35 L565 39 L567 43 L569 45 L570 48 L572 52 L574 55 L575 58 L577 62 L579 65 L580 68 L582 73 L584 75 L585 79 L587 83 L588 86 L590 90 L591 93 L592 97 L594 101 L595 103 L597 108 L598 111 L600 116%22/%3E%3Cpath d=%22M600 292 L597 296 L595 299 L593 302 L591 304 L589 307 L587 309 L584 312 L582 314 L579 317 L576 319 L573 322 L570 325 L567 327 L565 328 L562 330 L559 332 L555 334 L552 336 L550 337 L545 339 L542 340 L538 342 L535 343 L530 345 L527 345 L522 347 L520 347 L515 348 L510 349 L505 350 L502 350 L497 350 L492 351 L487 351 L482 351 L477 351 L472 350 L467 350 L463 350 L459 349 L454 349 L449 348 L444 348 L442 347 L437 346 L432 346 L427 345 L424 344 L419 343 L414 342 L412 342 L407 341 L402 340 L399 339 L394 338 L389 337 L387 336 L382 335 L379 335 L374 333 L369 332 L367 331 L362 330 L359 329 L354 327 L351 327 L346 325 L344 324 L339 322 L336 321 L333 319 L329 317 L326 316 L323 314 L319 312 L316 310 L314 308 L311 306 L309 304 L306 302 L303 299 L301 297 L299 294 L296 291 L294 287 L292 284 L291 282 L289 277 L288 274 L286 269 L286 267 L285 262 L285 257 L285 252 L286 247 L286 244 L288 239 L289 235 L290 231 L291 229 L294 224 L295 221 L296 219 L299 215 L301 211 L303 209 L304 206 L306 204 L309 200 L311 197 L314 194 L316 191 L318 189 L320 186 L322 184 L324 181 L326 178 L329 175 L331 172 L334 169 L336 166 L338 164 L340 161 L342 158 L344 156 L346 153 L349 150 L351 146 L354 143 L355 141 L357 138 L359 136 L362 132 L364 128 L366 126 L367 123 L369 121 L372 117 L374 113 L375 111 L377 108 L379 104 L381 101 L382 98 L384 95 L387 91 L388 88 L389 86 L392 81 L393 78 L395 75 L397 72 L399 68 L400 65 L402 62 L404 58 L405 55 L407 53 L409 49 L411 45 L413 43 L414 40 L417 36 L419 33 L421 30 L423 28 L425 25 L427 23 L429 20 L432 17 L434 15 L437 12 L439 10 L443 8 L446 5 L449 3 L452 1%22/%3E%3Cpath d=%22M126 0 L126 5 L127 10 L127 15 L126 20 L126 25 L125 28 L124 33 L123 36 L122 40 L121 43 L118 48 L117 50 L115 53 L113 57 L110 60 L108 63 L106 65 L103 68 L101 70 L98 73 L95 75 L93 76 L90 78 L85 81 L83 82 L80 83 L75 85 L72 86 L68 87 L63 88 L60 88 L55 89 L50 89 L45 89 L40 89 L35 88 L33 88 L28 87 L23 86 L19 86 L15 84 L11 83 L8 82 L4 81 L0 79%22/%3E%3Cpath d=%22M600 261 L599 264 L597 267 L596 272 L594 274 L592 278 L590 282 L589 284 L587 287 L585 290 L582 294 L580 297 L578 299 L575 302 L573 304 L570 307 L567 309 L565 312 L562 314 L560 315 L557 317 L554 319 L550 322 L547 323 L545 325 L540 327 L537 328 L533 330 L530 331 L526 332 L522 333 L517 334 L515 335 L510 336 L505 336 L500 337 L497 337 L492 338 L487 338 L482 338 L477 338 L472 337 L467 337 L464 337 L459 336 L454 336 L449 335 L446 335 L442 334 L437 333 L432 332 L429 332 L424 331 L419 330 L417 329 L412 328 L409 327 L404 326 L399 325 L397 324 L392 322 L389 322 L384 320 L382 319 L377 318 L374 317 L369 315 L367 314 L362 312 L359 310 L356 309 L352 307 L349 305 L346 304 L343 302 L340 299 L336 297 L334 295 L331 293 L329 290 L326 287 L324 284 L322 282 L321 279 L319 276 L317 272 L316 269 L315 264 L314 259 L314 254 L314 249 L315 244 L316 239 L317 236 L319 232 L320 229 L321 226 L323 221 L325 219 L326 216 L329 212 L331 209 L332 206 L334 204 L336 200 L339 196 L341 194 L343 191 L344 189 L346 186 L349 182 L351 179 L354 176 L356 174 L357 171 L359 169 L362 166 L364 162 L367 159 L369 156 L371 153 L372 151 L374 148 L377 145 L379 142 L381 138 L383 136 L385 133 L387 131 L389 127 L392 123 L393 121 L395 118 L397 116 L399 112 L402 108 L403 106 L405 103 L407 101 L409 97 L412 93 L413 91 L415 88 L417 86 L419 82 L422 78 L424 75 L426 73 L427 70 L429 68 L432 65 L434 62 L437 59 L439 56 L442 53 L444 51 L447 48 L449 46 L452 44 L454 42 L457 40 L460 38 L464 35 L467 34 L469 33 L474 31 L477 30 L482 28 L487 28 L490 27 L495 27 L498 28 L502 28 L507 29 L510 30 L515 32 L517 33 L521 35 L525 38 L527 39 L530 41 L532 43 L535 45 L537 48 L540 50 L542 53 L545 56 L547 59 L550 62 L552 65 L554 68 L556 70 L558 73 L560 76 L562 80 L564 83 L565 86 L567 89 L570 93 L571 96 L572 98 L575 103 L576 106 L577 108 L580 113 L581 116 L582 119 L584 123 L585 126 L587 131 L589 133 L590 137 L591 141 L592 144 L594 148 L595 151 L597 156 L597 159 L599 164 L600 168%22/%3E%3Cpath d=%22M101 0 L102 5 L103 10 L102 15 L102 20 L101 25 L100 28 L98 33 L97 35 L95 38 L93 43 L91 45 L89 48 L87 50 L84 53 L81 55 L78 58 L75 59 L73 61 L69 63 L65 64 L63 65 L58 67 L53 68 L50 68 L45 69 L40 69 L35 69 L30 69 L25 68 L23 67 L18 66 L14 65 L10 64 L7 63 L3 61 L0 60%22/%3E%3Cpath d=%22M485 70 L490 70 L495 69 L500 70 L504 70 L507 71 L512 73 L515 74 L517 75 L522 78 L525 80 L527 82 L530 84 L532 86 L535 88 L537 91 L540 93 L542 96 L545 99 L547 102 L550 105 L552 108 L554 111 L556 113 L558 116 L560 119 L562 123 L564 126 L565 128 L567 132 L569 136 L571 138 L572 142 L574 146 L575 148 L577 153 L579 156 L580 159 L581 164 L582 166 L584 171 L585 174 L586 179 L587 184 L588 186 L589 191 L590 196 L590 199 L591 204 L591 209 L592 214 L592 219 L592 224 L591 229 L591 234 L590 239 L590 242 L588 247 L587 250 L586 254 L585 258 L584 262 L582 264 L580 269 L579 272 L577 274 L575 278 L573 282 L571 284 L569 287 L566 289 L564 292 L562 294 L559 297 L556 299 L553 302 L550 304 L547 306 L545 308 L541 309 L537 312 L535 313 L531 314 L527 316 L525 317 L520 319 L516 319 L512 320 L507 321 L504 322 L500 323 L495 323 L490 323 L485 323 L479 323 L474 323 L469 323 L464 323 L459 322 L457 322 L452 321 L447 320 L443 319 L439 319 L434 318 L431 317 L427 316 L422 315 L419 314 L414 312 L412 312 L407 310 L404 309 L399 307 L397 306 L392 304 L389 303 L387 302 L382 299 L379 298 L377 297 L373 294 L369 292 L367 290 L364 288 L362 286 L359 284 L356 281 L354 278 L351 275 L350 272 L348 269 L346 264 L346 262 L345 257 L344 252 L344 247 L345 242 L346 236 L346 234 L348 229 L349 226 L351 221 L352 219 L354 215 L356 211 L358 209 L359 206 L362 202 L364 199 L365 196 L367 194 L369 190 L372 187 L374 184 L375 181 L377 179 L379 176 L382 173 L384 169 L386 166 L388 164 L390 161 L392 158 L394 156 L397 152 L399 149 L401 146 L403 143 L405 141 L407 138 L409 136 L412 132 L414 129 L417 126 L419 123 L421 121 L423 118 L425 116 L427 113 L429 111 L432 108 L434 105 L437 102 L439 99 L442 97 L444 94 L447 92 L449 90 L452 87 L454 85 L457 83 L461 81 L464 78 L467 77 L470 75 L474 73 L477 72 L482 71 L485 70%22/%3E%3Cpath d=%22M71 0 L72 5 L72 10 L71 15 L70 19 L69 23 L68 25 L65 29 L63 32 L60 34 L58 36 L55 38 L50 40 L48 41 L43 43 L40 43 L35 44 L30 44 L25 43 L23 43 L18 41 L14 40 L10 38 L8 37 L5 35 L1 33%22/%3E%3Cpath d=%22M485 111 L490 110 L495 110 L500 110 L503 111 L507 112 L512 113 L515 114 L517 116 L522 118 L525 120 L527 122 L530 124 L532 126 L535 129 L537 131 L540 134 L542 137 L545 140 L547 143 L549 146 L551 148 L553 151 L555 154 L557 158 L559 161 L560 164 L562 169 L563 171 L565 175 L566 179 L567 182 L569 186 L570 190 L571 194 L572 199 L572 202 L573 206 L574 211 L574 216 L574 221 L574 226 L573 231 L573 236 L572 239 L571 244 L570 248 L569 252 L567 255 L566 259 L564 262 L562 265 L560 269 L558 272 L556 274 L554 277 L552 279 L550 282 L547 284 L544 287 L541 289 L537 292 L535 293 L532 295 L528 297 L525 299 L522 300 L517 302 L515 302 L510 304 L507 304 L502 305 L497 306 L492 307 L487 307 L485 307 L479 307 L477 307 L472 307 L467 306 L462 306 L457 305 L454 304 L449 303 L444 302 L442 302 L437 300 L434 299 L429 298 L426 297 L422 295 L419 294 L414 292 L412 291 L409 289 L404 287 L402 285 L399 283 L397 282 L393 279 L391 277 L388 274 L386 272 L384 269 L382 266 L379 262 L378 259 L377 254 L376 252 L375 247 L375 242 L376 236 L377 232 L377 229 L379 224 L380 221 L382 217 L383 214 L384 211 L387 206 L388 204 L389 201 L392 198 L394 194 L396 191 L397 189 L399 186 L402 182 L404 179 L406 176 L408 174 L410 171 L412 169 L414 166 L417 163 L419 160 L422 157 L424 154 L427 151 L429 148 L431 146 L434 143 L436 141 L439 138 L441 136 L444 133 L447 131 L449 129 L452 127 L454 125 L457 123 L460 121 L464 118 L467 117 L469 116 L474 113 L477 113 L482 111 L485 111%22/%3E%3Cpath d=%22M479 151 L485 150 L490 149 L495 149 L500 150 L505 151 L507 151 L512 153 L515 155 L517 156 L520 158 L524 161 L527 164 L529 166 L531 169 L533 171 L535 174 L537 176 L540 180 L542 184 L543 186 L545 190 L546 194 L547 197 L549 201 L550 206 L550 209 L551 214 L551 219 L551 224 L551 229 L550 234 L550 236 L548 242 L547 245 L546 249 L544 252 L542 255 L540 259 L538 262 L536 264 L533 267 L531 269 L528 272 L525 274 L522 275 L520 277 L515 279 L512 281 L509 282 L505 283 L500 284 L497 285 L492 286 L487 286 L482 286 L477 286 L472 286 L467 285 L463 284 L459 283 L454 282 L452 281 L447 280 L444 279 L440 277 L437 275 L434 274 L431 272 L427 269 L424 267 L422 265 L419 262 L417 259 L415 257 L414 254 L412 249 L411 247 L410 242 L410 236 L410 231 L411 226 L412 222 L413 219 L414 215 L416 211 L417 209 L419 205 L421 201 L423 199 L424 196 L427 193 L429 189 L432 186 L434 184 L436 181 L438 179 L441 176 L443 174 L446 171 L449 169 L452 166 L454 164 L457 162 L459 160 L462 158 L466 156 L469 154 L472 153 L477 151 L479 151%22/%3E%3Cpath d=%22M482 201 L487 200 L492 200 L496 201 L500 203 L502 204 L505 207 L507 210 L509 214 L510 216 L511 221 L511 226 L510 231 L509 234 L507 238 L505 241 L502 243 L500 245 L497 247 L492 248 L487 249 L485 249 L481 249 L477 248 L472 247 L469 245 L467 244 L464 241 L462 238 L460 234 L460 229 L460 224 L462 219 L463 216 L464 214 L467 211 L469 208 L472 206 L475 204 L479 202 L482 201%22/%3E%3C/g%3E%3C/svg%3E");
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--nuit); color: var(--neige); font-family: var(--body); font-size: 15px; line-height: 1.45; }
+body { min-height: 100vh; font-variant-numeric: tabular-nums; background: radial-gradient(120% 60% at 50% -10%, #1b3142 0%, var(--nuit) 60%) fixed; }
+a { color: inherit; text-decoration: none; }
+h2, h3, h4 { margin: 0; }
+h2 { font-family: var(--display); font-weight: 800; font-size: 34px; line-height: 1; letter-spacing: 0.005em; }
+h3 { font-family: var(--display); font-weight: 700; font-size: 21px; line-height: 1.1; letter-spacing: 0.01em; }
+.h4 { font-size: 18px; margin-top: 18px; }
+small { font-size: 0.72em; color: var(--brume); font-weight: 500; font-family: var(--body); }
+.muted { color: var(--brume); }
+.tiny { font-size: 12.5px; }
+.center { text-align: center; }
+.err { color: var(--bad); }
+.eyebrow { font-size: 13px; font-weight: 600; color: var(--brume); margin: 0 0 6px; }
+:focus-visible { outline: 2px solid var(--glacier); outline-offset: 2px; border-radius: 6px; }
+
+/* Barre du haut */
+.topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: calc(12px + var(--safe-top)) 18px 12px; background: rgba(13, 24, 33, 0.82); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.brand { display: flex; gap: 10px; align-items: center; font-family: var(--display); font-weight: 800; font-size: 22px; letter-spacing: 0.02em; }
+.logo { width: 30px; height: 30px; display: grid; place-items: center; color: var(--alpenglow); }
+.logo svg { width: 28px; height: 28px; }
+.top-right { display: flex; align-items: center; gap: 8px; }
+.sync { font-size: 12px; color: var(--brume-2); display: flex; align-items: center; gap: 6px; }
+.demo-badge { color: var(--warn); font-weight: 600; }
+.icon-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--arete); background: transparent; color: var(--brume); display: grid; place-items: center; cursor: pointer; }
+.icon-btn svg { width: 19px; height: 19px; fill: currentColor; }
+.spin { width: 12px; height: 12px; border: 2px solid var(--brume-2); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Contenu */
+.view { max-width: 760px; margin: 0 auto; padding: 8px 16px calc(104px + var(--safe-bottom)); display: flex; flex-direction: column; gap: 14px; }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 10px 2px 2px; }
+.card { background: var(--roche); border-radius: 20px; padding: 18px; position: relative; }
+.card.slim { padding: 13px 16px; font-size: 14px; border-radius: 14px; }
+.card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.card-head + .card-head { margin-top: 16px; }
+.link { color: var(--glacier); font-size: 13.5px; font-weight: 600; }
+.divider { height: 1px; background: var(--arete); margin: 16px 0; }
+.back { color: var(--glacier); font-weight: 600; font-size: 14px; padding: 6px 2px 0; }
+.empty { text-align: center; color: var(--brume); }
+
+/* Statut */
+.status-good { --st: var(--good); } .status-ok { --st: var(--glacier); } .status-warn { --st: var(--warn); } .status-bad { --st: var(--bad); }
+.card.slim[class*="status-"] { background: color-mix(in srgb, var(--st) 10%, var(--roche)); }
+
+/* Héros « État du jour » : carte topographique + ligne de crête de la VFC */
+.hero { padding: 22px 20px 18px; border-radius: 26px; overflow: hidden; background: linear-gradient(180deg, #183041 0%, var(--roche) 70%); isolation: isolate; }
+.hero::before { content: ''; position: absolute; inset: 0; background-image: var(--contours); background-size: 760px auto; background-position: 40% 30%; z-index: -1; }
+.hero .eyebrow { color: var(--brume); font-size: 13px; }
+.hero-title { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-weight: 800; font-size: 40px; line-height: 0.95; margin: 4px 0 8px; color: var(--neige); }
+.status-ico { width: 14px; height: 14px; border-radius: 50%; flex: none; background: var(--st); box-shadow: 0 0 0 5px color-mix(in srgb, var(--st) 22%, transparent), 0 0 22px var(--st); }
+.status-ico svg { display: none; }
+.hero p.muted { max-width: 34ch; }
+.ridge { margin: 10px -20px 0; height: 96px; position: relative; }
+.ridge svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.ridge-cap { position: absolute; left: 20px; top: 2px; font-size: 12px; color: var(--brume); }
+.signals { list-style: none; padding: 0; margin: 10px 0 2px; display: grid; grid-template-columns: repeat(4, 1fr); }
+.sig { display: flex; flex-direction: column; gap: 1px; padding: 2px 10px; border-left: 1px solid var(--arete); }
+.sig:first-child { border-left: 0; padding-left: 0; }
+.sig-k { font-size: 12px; color: var(--brume); display: flex; align-items: center; gap: 6px; }
+.sig-k::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--s); }
+.sig-neutral { --s: var(--brume-2); } .sig-good { --s: var(--good); } .sig-warn { --s: var(--warn); } .sig-bad { --s: var(--bad); }
+.sig b { font-family: var(--display); font-size: 27px; font-weight: 700; line-height: 1.05; }
+.sig-ref { font-size: 11.5px; color: var(--brume-2); }
+@media (max-width: 440px) { .signals { grid-template-columns: repeat(2, 1fr); row-gap: 12px; } .sig:nth-child(3) { border-left: 0; padding-left: 0; } }
+
+/* Chiffres */
+.grid-4 { display: none; }
+.week-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px 12px; margin-bottom: 10px; }
+.ws { display: flex; flex-direction: column; }
+.ws-k { font-size: 12.5px; color: var(--brume); }
+.ws-v { font-family: var(--display); font-size: 32px; font-weight: 800; line-height: 1.05; }
+.ws-d { font-size: 12.5px; color: var(--brume-2); }
+.up { color: var(--good); } .down { color: var(--alpenglow); }
+.ws-d.up, .ws-d.down { font-weight: 600; }
+
+/* Séances */
+.act-card, .act-row { display: block; }
+.act-head { display: flex; gap: 12px; align-items: center; }
+.act-head > div { display: flex; flex-direction: column; min-width: 0; }
+.act-head b { font-size: 16px; }
+.act-head.big h2 { font-size: 30px; }
+.sport-ico { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; background: color-mix(in srgb, var(--c) 18%, transparent); border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); }
+.sport-ico svg { width: 21px; height: 21px; fill: var(--c); }
+.s-run { --c: #6fcfe0; } .s-ride { --c: #ffb26b; } .s-hike { --c: #8fd6a0; } .s-strength { --c: #c0a8ff; } .s-swim { --c: #7fa8ff; } .s-other { --c: #a3b6c4; }
+.act-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 12px; margin: 16px 0 14px; }
+.act-stats div { display: flex; flex-direction: column; }
+.act-stats span { font-size: 12px; color: var(--brume); }
+.act-stats b { font-family: var(--display); font-size: 26px; font-weight: 700; line-height: 1.05; }
+.act-list { display: flex; flex-direction: column; }
+.act-row { display: flex; gap: 14px; padding: 14px 4px; border-bottom: 1px solid var(--arete); }
+.act-list .act-row:last-child { border-bottom: 0; }
+.act-list { background: var(--roche); border-radius: 18px; padding: 0 14px; }
+.act-row:active, .act-card:active { opacity: 0.75; }
+.act-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.act-title { display: flex; gap: 8px; align-items: center; }
+.act-title b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 15.5px; }
+.act-nums { display: flex; flex-wrap: wrap; gap: 2px 14px; font-family: var(--display); font-size: 19px; font-weight: 700; margin: 4px 0 8px; }
+.week-h { font-family: var(--display); font-size: 19px; color: var(--neige); margin: 14px 2px 0; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 700; }
+.week-h span { font-family: var(--body); font-size: 12.5px; font-weight: 500; color: var(--brume); }
+.search { width: 100%; background: var(--roche); border: 1px solid var(--arete); color: var(--neige); border-radius: 999px; padding: 12px 18px; font-size: 15px; font-family: inherit; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0; margin-top: 18px; border-top: 1px solid var(--arete); }
+.st { display: flex; flex-direction: column; gap: 0; padding: 12px 2px; border-bottom: 1px solid var(--arete); }
+.st > span { font-size: 12.5px; color: var(--brume); }
+.st b { font-family: var(--display); font-size: 28px; font-weight: 700; line-height: 1.05; }
+.st b i { font-style: normal; }
+.desc { white-space: pre-wrap; color: var(--brume); margin: 14px 0 0; }
+
+/* Zones : du glacier (Z1) à l'alpenglow (Z6) */
+.zbar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; gap: 2px; background: var(--roche-2); }
+.zbar span { min-width: 2px; }
+.ztable { display: flex; flex-direction: column; gap: 9px; }
+.ztable .eyebrow { font-family: var(--display); font-size: 21px; font-weight: 700; color: var(--neige); margin-bottom: 6px; }
+.zrow { display: grid; grid-template-columns: minmax(130px, 1.3fr) 62px 1.4fr 60px 42px; gap: 10px; align-items: center; font-size: 13.5px; }
+.zlab { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.zlab b { font-family: var(--display); font-size: 17px; }
+.zname { color: var(--brume); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.zdot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.zrange { color: var(--brume-2); font-size: 12px; }
+.ztrack { height: 8px; background: var(--roche-2); border-radius: 4px; overflow: hidden; }
+.ztrack span { display: block; height: 100%; border-radius: 4px; }
+.ztime { text-align: right; font-weight: 600; }
+.zpct { text-align: right; color: var(--brume); }
+@media (max-width: 460px) { .zrow { grid-template-columns: minmax(70px, 1fr) 56px 1fr 54px 38px; } .zname { display: none; } }
+
+/* Graphiques */
+.chart { position: relative; width: 100%; }
+.h150 { height: 150px; } .h180 { height: 180px; } .h200 { height: 200px; } .h220 { height: 220px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--brume); margin: 0 0 10px; }
+.legend span { display: flex; align-items: center; gap: 7px; }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; }
+#charts .chart + .card-head { margin-top: 20px; }
+
+/* Sélecteur */
+.seg { display: inline-flex; background: var(--roche); border-radius: 999px; padding: 4px; gap: 2px; max-width: 100%; overflow-x: auto; }
+.seg button { border: 0; background: none; color: var(--brume); font: inherit; font-size: 13.5px; font-weight: 600; padding: 7px 13px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+.seg button.on { background: var(--neige); color: var(--nuit); }
+
+/* Étiquettes */
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+.tag { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--arete); color: var(--brume); white-space: nowrap; }
+.tag.prio-A { border-color: color-mix(in srgb, var(--alpenglow) 60%, transparent); color: var(--alpenglow-2); background: color-mix(in srgb, var(--alpenglow) 12%, transparent); }
+.tag.prio-B { border-color: color-mix(in srgb, var(--glacier) 50%, transparent); color: var(--glacier); }
+.tag.st-ok { color: var(--good); } .tag.st-todo { color: var(--warn); } .tag.st-maybe { color: var(--brume-2); }
+.tag.lvl-good { color: var(--good); } .tag.lvl-warn { color: var(--warn); } .tag.lvl-bad { color: var(--bad); }
+
+/* Courses : le compte à rebours est un dossard */
+.race-line { display: flex; gap: 16px; align-items: center; }
+.countdown { position: relative; min-width: 88px; text-align: center; background: #f4f1ea; color: #14202a; border-radius: 6px; padding: 14px 8px 9px; display: flex; flex-direction: column; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); transform: rotate(-2deg); }
+.countdown::before, .countdown::after { content: ''; position: absolute; top: 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--roche); }
+.countdown::before { left: 6px; } .countdown::after { right: 6px; }
+.countdown b { font-family: var(--display); font-size: 40px; font-weight: 800; line-height: 0.9; }
+.countdown span { font-size: 11px; font-weight: 600; color: #4a5a66; margin-top: 2px; }
+.race-next .countdown { border-top: 6px solid var(--alpenglow); }
+.race-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.race-info b { font-family: var(--display); font-size: 24px; font-weight: 700; line-height: 1.05; }
+.race-list { display: flex; flex-direction: column; background: var(--roche); border-radius: 18px; padding: 0 16px; }
+.race-item { display: flex; gap: 14px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--arete); }
+.race-item:last-child { border-bottom: 0; }
+.ri-date { min-width: 46px; text-align: center; display: flex; flex-direction: column; padding-left: 8px; border-left: 3px solid var(--p, var(--arete)); }
+.prio-b-A { --p: var(--alpenglow); } .prio-b-B { --p: var(--glacier); }
+.ri-date b { font-family: var(--display); font-size: 30px; font-weight: 800; line-height: 1; }
+.ri-date span { font-size: 12.5px; color: var(--brume); }
+.ri-date small { font-size: 10.5px; color: var(--brume-2); }
+.ri-main { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ri-main > b { font-size: 16px; }
+.ri-cd b { font-family: var(--display); font-size: 19px; color: var(--brume); white-space: nowrap; }
+.note { color: var(--brume-2); font-style: italic; }
+
+/* Plus */
+.menu { display: flex; flex-direction: column; background: var(--roche); border-radius: 20px; overflow: hidden; }
+.menu-item { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-bottom: 1px solid var(--arete); }
+.menu-item:last-child { border-bottom: 0; }
+.menu-item span:nth-child(2) { flex: 1; display: flex; flex-direction: column; }
+.menu-item b { font-family: var(--display); font-size: 21px; font-weight: 700; }
+.menu-item small { color: var(--brume); font-size: 12.5px; }
+.mi-ico { font-size: 22px; width: 32px; text-align: center; filter: saturate(0.6); }
+.chev { color: var(--brume-2); font-size: 24px; }
+
+/* Tests */
+.thr { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--arete); font-size: 14px; }
+.thr-k { font-family: var(--display); font-weight: 800; font-size: 20px; width: 44px; color: var(--alpenglow); }
+.gbar { height: 6px; background: var(--roche-2); border-radius: 3px; overflow: hidden; }
+.gbar span { display: block; height: 100%; border-radius: 3px; }
+.lvl-bg-good { background: linear-gradient(90deg, var(--glacier), var(--good)); } .lvl-bg-ok { background: var(--glacier); } .lvl-bg-warn { background: var(--warn); } .lvl-bg-bad { background: var(--bad); }
+
+/* Tours et temps au km */
+.splits { display: flex; flex-direction: column; font-size: 13.5px; }
+.sp { display: grid; grid-template-columns: 34px 48px 48px 1fr 34px 46px; gap: 8px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--arete); }
+.laps .sp { grid-template-columns: 22px 1fr 1fr 46px 46px 34px 44px; gap: 6px; }
+.laps .sp span:nth-child(4) { text-align: left; }
+.sp b { font-family: var(--display); font-size: 17px; }
+.vap { color: var(--glacier); font-weight: 600; }
+.sp.head span, .sp.head .vap { color: var(--brume-2); font-weight: 500; font-size: 12px; }
+.sp > :last-child, .sp > :nth-last-child(2) { text-align: right; color: var(--brume); }
+.sp-bar { height: 6px; background: var(--roche-2); border-radius: 3px; overflow: hidden; }
+.sp-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--glacier), var(--alpenglow)); border-radius: 3px; }
+
+/* Tableaux */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.tbl th { text-align: right; color: var(--brume-2); font-weight: 600; font-size: 11.5px; padding: 6px 4px; line-height: 1.2; }
+.tbl th small { color: var(--brume-2); font-weight: 400; }
+.tbl td { text-align: right; padding: 9px 4px; border-top: 1px solid var(--arete); }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+
+/* Formulaires */
+.form { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.form label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--brume); font-weight: 600; }
+.form input, .form textarea, #io { background: var(--roche-2); border: 1px solid var(--arete); color: var(--neige); border-radius: 12px; padding: 12px 13px; font: inherit; font-size: 15px; width: 100%; }
+.form fieldset { border: 1px solid var(--arete); border-radius: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 12px 12px; }
+.form legend { font-family: var(--display); font-weight: 800; font-size: 18px; color: var(--alpenglow); padding: 0 6px; }
+.form .check { flex-direction: row; align-items: center; gap: 10px; }
+.form .check input { width: auto; }
+.row { display: flex; gap: 8px; }
+.row.wrap { flex-wrap: wrap; }
+.btn { border: 0; background: var(--glacier); color: var(--nuit); font: inherit; font-weight: 700; font-size: 14px; padding: 12px 18px; border-radius: 999px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--neige); border: 1px solid var(--arete); }
+.btn.small { padding: 8px 14px; font-size: 13px; }
+.btn.wide { width: 100%; }
+#io { margin-top: 10px; }
+
+/* Planning */
+.weeknav { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: transparent !important; padding: 4px 0 !important; }
+.weeknav .icon-btn { font-size: 24px; }
+.wn-mid { display: flex; flex-direction: column; align-items: center; }
+.wn-mid b { font-family: var(--display); font-size: 24px; font-weight: 800; }
+.days { display: flex; flex-direction: column; background: var(--roche); border-radius: 20px; padding: 0 16px; }
+.day { padding: 14px 0; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--arete); }
+.day:last-child { border-bottom: 0; }
+.day.today { margin: 0 -16px; padding: 14px 16px; background: linear-gradient(90deg, color-mix(in srgb, var(--glacier) 12%, transparent), transparent 70%); border-left: 3px solid var(--glacier); }
+.day.past { opacity: 0.78; }
+.day-h { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.day-h b { font-family: var(--display); font-size: 21px; font-weight: 700; text-transform: capitalize; min-width: 64px; }
+.plan-item { display: flex; gap: 10px; align-items: baseline; font-size: 14.5px; }
+.kind { font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; color: var(--brume); border: 1px solid var(--arete); flex: none; min-width: 84px; text-align: center; }
+.k-quality { color: var(--alpenglow-2); border-color: color-mix(in srgb, var(--alpenglow) 55%, transparent); }
+.k-race { color: var(--nuit); background: var(--alpenglow); border-color: var(--alpenglow); }
+.k-test { color: #d6c8ff; border-color: rgba(192, 168, 255, 0.5); }
+.k-strength { color: #d6c8ff; border-color: rgba(192, 168, 255, 0.3); }
+.k-ride { color: #ffcf9b; border-color: rgba(255, 178, 107, 0.4); }
+.k-easy { color: var(--glacier); border-color: color-mix(in srgb, var(--glacier) 40%, transparent); }
+.done { display: flex; align-items: center; gap: 9px; background: var(--roche-2); border-radius: 12px; padding: 8px 11px; font-size: 13.5px; }
+.check { color: var(--good); font-weight: 800; }
+.sport-ico.mini { width: 22px; height: 22px; }
+.sport-ico.mini svg { width: 13px; height: 13px; }
+.dn { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+.dv { color: var(--brume); white-space: nowrap; }
+
+/* Barre d'onglets */
+.tabbar { position: fixed; left: 10px; right: 10px; bottom: calc(10px + var(--safe-bottom)); z-index: 30; display: grid; grid-template-columns: repeat(6, 1fr); background: rgba(21, 35, 46, 0.86); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid var(--arete); border-radius: 26px; padding: 7px 4px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4); }
+.tabbar a { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10.5px; font-weight: 600; color: var(--brume-2); padding: 5px 0; border-radius: 18px; }
+.tabbar svg { width: 23px; height: 23px; fill: currentColor; }
+.tabbar a.on { color: var(--neige); background: rgba(111, 207, 224, 0.12); }
+.tabbar a.on svg { fill: var(--glacier); }
+@media (min-width: 900px) { .tabbar { max-width: 640px; margin: 0 auto; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+.ridge-dot { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #ffc2a8; box-shadow: 0 0 0 4px rgba(255, 143, 107, 0.25), 0 0 16px #ff8f6b; }
+
+/* Analyse de séance */
+.an-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.readout { position: sticky; top: calc(64px + var(--safe-top)); z-index: 5; display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 10px 12px; margin: 0 -6px 12px; background: rgba(28, 45, 58, 0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 14px; border: 1px solid var(--arete); min-height: 52px; align-items: center; }
+.readout span { display: flex; flex-direction: column; }
+.readout small { font-size: 11px; color: var(--brume-2); }
+.readout b { font-family: var(--display); font-size: 19px; font-weight: 700; line-height: 1.05; }
+.readout em { font-style: normal; font-family: var(--body); font-size: 11px; font-weight: 700; margin-left: 4px; color: var(--brume); }
+.readout .ro-hint { font-size: 12.5px; color: var(--brume); }
+.c-pace { color: var(--glacier); } .c-gap { color: #8fd6a0; } .c-hr { color: #ff8796; }
+.an-block + .an-block { margin-top: 14px; }
+.an-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.an-title b { font-family: var(--display); font-size: 19px; font-weight: 700; }
+.an-title span { font-size: 12.5px; color: var(--brume); }
