@@ -51,12 +51,13 @@ export function parseRaceRows(rows, tab) {
     const titre = (r[ci.titre] || '').trim();
     if (!titre) continue;
     const dateTxt = (r[ci.date] || '').trim();
-    const month = monthFrom(dateTxt);
-    const dayM = dateTxt.match(/^(\d{1,2})/);
+    const full = dateTxt.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/) || dateTxt.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    const month = full ? (full[1].length === 4 ? +full[2] - 1 : +full[2] - 1) : monthFrom(dateTxt);
+    const dayM = full ? [null, full[1].length === 4 ? full[3] : full[1]] : dateTxt.match(/^(\d{1,2})/);
     const approx = !dayM;
     let date = null;
     if (month != null) {
-      const year = month >= 7 ? y1 : y2;
+      const year = full ? +(full[1].length === 4 ? full[1] : full[3]) : month >= 7 ? y1 : y2;
       // jour exact, sinon milieu / début / fin du mois selon le texte
       const hint = dateTxt.replace(/d[ée]finir/i, '');
       const day = dayM ? Number(dayM[1]) : /d[ée]but/i.test(hint) ? 5 : /\bfin\b/i.test(hint) ? 25 : 15;

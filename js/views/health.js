@@ -29,12 +29,13 @@ export function renderHealth(el) {
   const rhr7 = rolling(days.map(x => x.w.restingHR ?? null), 7).slice(off);
   const steps = view.map(x => x.w.steps ?? null);
   const prev = days.slice(-2 * period, -period);
-  const cmp = (cur, prv, f, unit, dec = 0, invert = false) => {
+  const cmp = (cur, prv, f, unit, dec = 0, invert = false, fd = null) => {
     const a = mean(cur), b = mean(prv);
     if (a == null) return '<span class="ws-v">–</span>';
     const d = b != null ? a - b : null;
     const good = d == null ? null : invert ? d <= 0 : d >= 0;
-    return `<span class="ws-v">${f(a)}</span>${d != null && fmtNum(Math.abs(d), dec) !== '0' ? `<span class="ws-d ${good ? 'up' : 'down'}">${d >= 0 ? '+' : '−'}${fmtNum(Math.abs(d), dec)}${unit}</span>` : ''}`;
+    const txt = d == null ? '' : fd ? fd(Math.abs(d)) : `${fmtNum(Math.abs(d), dec)}${unit}`;
+    return `<span class="ws-v">${f(a)}</span>${d != null && txt && txt !== '0' && txt !== '0 min' ? `<span class="ws-d ${good ? 'up' : 'down'}">${d >= 0 ? '+' : '−'}${txt}</span>` : ''}`;
   };
   const rec = recovery(all);
 
@@ -44,7 +45,7 @@ export function renderHealth(el) {
     <section class="card">
       <div class="week-stats">
         <div class="ws"><span class="ws-k">VFC moy.</span>${cmp(hrv, prev.map(x => x.w.hrv), v => `${Math.round(v)} ms`, ' ms')}</div>
-        <div class="ws"><span class="ws-k">Sommeil moy.</span>${cmp(sleepH, prev.map(x => x.w.sleepSecs ? x.w.sleepSecs / 3600 : null), v => fmtHours(v * 3600), ' h', 1)}</div>
+        <div class="ws"><span class="ws-k">Sommeil moy.</span>${cmp(sleepH, prev.map(x => x.w.sleepSecs ? x.w.sleepSecs / 3600 : null), v => fmtHours(v * 3600), '', 0, false, v => `${Math.round(v * 60)} min`)}</div>
         <div class="ws"><span class="ws-k">FC repos moy.</span>${cmp(rhr, prev.map(x => x.w.restingHR), v => `${Math.round(v)} bpm`, '', 0, true)}</div>
         <div class="ws"><span class="ws-k">Pas / jour</span>${cmp(steps, prev.map(x => x.w.steps), v => fmtNum(v), '')}</div>
       </div>

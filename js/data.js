@@ -1,7 +1,7 @@
 // Accès aux données : Intervals.icu (API publique, clé personnelle) + cache local + mode démo
 import { isoDate, addDays, today } from './util.js';
 import { buildDemo, demoStreams, demoLaps } from './demo.js';
-import { suuntoSummary } from './fit.js';
+import { fitActivity } from './fit.js';
 
 const BASE = 'https://intervals.icu/api/v1';
 const LS = {
@@ -21,7 +21,7 @@ function writeJSON(key, v) { try { localStorage.setItem(key, JSON.stringify(v));
 
 export const settings = {
   get() {
-    return Object.assign({ apiKey: '', athleteId: '0', sheetId: '1tWbSyZ-WKS4PHJ8PfpeE2q1EeRh6VB3f2-Eat0ZTkEg', sheetTabs: 'Calendrier 2025/2026,Calendrier 2026/2027', planSheetId: '1D4-NZk7bY_4dhvsosQyqe4KTlk2XjkCIYqublF3kDZ8', planTabPrefix: 'S', shoeLimit: 800, demo: false }, readJSON(LS.settings, {}));
+    return Object.assign({ apiKey: '', athleteId: '0', sheetId: '1tWbSyZ-WKS4PHJ8PfpeE2q1EeRh6VB3f2-Eat0ZTkEg', sheetTabs: 'Calendrier 2025/2026,Calendrier 2026/2027', scriptUrl: '', planSheetId: '1D4-NZk7bY_4dhvsosQyqe4KTlk2XjkCIYqublF3kDZ8', planTabPrefix: 'S', shoeLimit: 800, demo: false }, readJSON(LS.settings, {}));
   },
   set(patch) { const s = Object.assign(this.get(), patch); writeJSON(LS.settings, s); return s; },
 };
@@ -66,6 +66,12 @@ class Intervals {
     return buf;
   }
   streams(actId) { return this.get(`/activity/${actId}/streams.json`, { types: 'time,distance,heartrate,velocity_smooth,altitude,fixed_altitude' }); }
+  async post(path, body) {
+    const r = await fetch(`${BASE}${path}`, { method: 'POST', headers: { Authorization: 'Basic ' + btoa('API_KEY:' + this.key), 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!r.ok) throw new Error(`Intervals.icu a refusé l'enregistrement (${r.status}) : ${(await r.text()).slice(0, 160)}`);
+    return r.json().catch(() => ({}));
+  }
+  addManual(body) { return this.post(`/athlete/${this.id}/activities/manual`, body); }
   updateRunSettings(patch) { return this.put(`/athlete/${this.id}/sport-settings/Run`, patch); }
 }
 
@@ -97,6 +103,8 @@ export async function load({ force = false } = {}) {
   const cache = readJSON(LS.cache, null);
   if (cache && !force) {
     Object.assign(state, cache, { updated: cache.updated ? new Date(cache.updated) : null });
+    state.stravaStubs = (state.activities || []).filter(isStub);
+    state.activities = (state.activities || []).filter(a => !isStub(a)).map(a => applyFit(a));
     state.races = await loadRaces(true);
     state.plan = await loadPlan(true);
     emit();
@@ -121,7 +129,8 @@ export async function load({ force = false } = {}) {
     ]);
     const ids = new Set(acts.map(a => a.id));
     const merged = sortActs([...acts, ...prev.filter(a => !ids.has(a.id) && a.start_date_local < oldestActs)]);
-    Object.assign(state, { athlete: slimAthlete(athlete), activities: merged, wellness: well.sort((a, b) => a.id.localeCompare(b.id)), gear, paceCurves: slimCurves(pc), updated: new Date() });
+    state.stravaStubs = merged.filter(isStub);
+    Object.assign(state, { athlete: slimAthlete(athlete), activities: merged.filter(a => !isStub(a)).map(a => applyFit(a)), wellness: well.sort((a, b) => a.id.localeCompare(b.id)), gear, paceCurves: slimCurves(pc), updated: new Date() });
     if (!writeJSON(LS.cache, { athlete: state.athlete, activities: state.activities, wellness: state.wellness, gear, paceCurves: state.paceCurves, updated: state.updated })) {
       // Si le stockage est plein, on garde le cache sans les descriptions
       writeJSON(LS.cache, { athlete: state.athlete, activities: state.activities.map(({ description, ...a }) => a), wellness: state.wellness, gear, paceCurves: state.paceCurves, updated: state.updated });
@@ -135,6 +144,69 @@ export async function load({ force = false } = {}) {
     state.loading = false;
     emit();
   }
+  if (!state.error) prefetchFits();
+}
+
+// Séances venues de Strava : Intervals.icu n'a pas le droit de les transmettre (règle Strava) → coquilles vides
+export const isStub = a => !!a._note || (a.source === 'STRAVA' && !a.type);
+
+// Chiffres exacts de la montre (lus dans le fichier FIT) appliqués par-dessus ceux d'Intervals.icu
+function fitStore() { return readJSON('ss.fit', {}); }
+function applyFit(a, store = null) {
+  const f = (store || (applyFit._s ||= fitStore()))[a.id];
+  if (!f) return a;
+  const x = { ...a, _fit: true };
+  if (f.distance) x.distance = f.distance;
+  if (f.timer) x.moving_time = Math.round(f.timer);
+  if (f.elapsed) x.elapsed_time = Math.round(f.elapsed);
+  if (x.distance && x.moving_time) x.average_speed = x.distance / x.moving_time;
+  if (f.avgHr) x.average_heartrate = f.avgHr;
+  if (f.maxHr) x.max_heartrate = f.maxHr;
+  if (f.ascent != null) x.total_elevation_gain = f.ascent;
+  if (f.descent != null) x.total_elevation_loss = f.descent;
+  if (f.vo2max) x.vo2max = f.vo2max;
+  return x;
+}
+const fitCache = new Map();
+export async function getFit(a) {
+  if (!a || state.demo || a.source !== 'SUUNTO') return null;
+  if (fitCache.has(a.id)) return fitCache.get(a.id);
+  const full = fitActivity(await client().file(a.id));
+  const sm = { ...full.summary };
+  if (sm.vo2max != null) sm.vo2max = Math.round(sm.vo2max * 10) / 10;
+  const st = fitStore(); st[a.id] = sm; writeJSON('ss.fit', st); applyFit._s = st;
+  const i = state.activities.findIndex(x => x.id === a.id);
+  if (i >= 0) state.activities[i] = applyFit(state.activities[i], st);
+  fitCache.clear(); fitCache.set(a.id, full); // on ne garde en mémoire que la dernière séance ouverte
+  return full;
+}
+// En arrière-plan : récupère les chiffres montre des 60 dernières séances Suunto (une fois par séance)
+let prefetching = false;
+async function prefetchFits() {
+  if (prefetching || state.demo) return;
+  prefetching = true;
+  try {
+    const st = fitStore();
+    const todo = state.activities.filter(a => a.source === "SUUNTO" && st[a.id] === undefined).slice(0, 60);
+    let n = 0;
+    for (const a of todo) {
+      try {
+        const sm = fitActivity(await client().file(a.id)).summary;
+        if (sm.vo2max != null) sm.vo2max = Math.round(sm.vo2max * 10) / 10;
+        st[a.id] = sm; n++;
+        if (n % 10 === 0) writeJSON('ss.fit', st);
+      } catch (e) { if (st[a.id] == null) st[a.id] = false; }
+      await new Promise(r => setTimeout(r, 250));
+    }
+    writeJSON('ss.fit', st); applyFit._s = st;
+    if (n) { state.activities = state.activities.map(a => applyFit(a, st)); emit(); }
+  } finally { prefetching = false; }
+}
+
+export async function addManualActivity(body) {
+  if (state.demo) throw new Error('Indisponible en mode démo : renseigne ta clé API dans Réglages.');
+  await client().addManual(body);
+  await load();
 }
 
 function slimAthlete(a) {
@@ -157,17 +229,9 @@ const streamCache = new Map();
 const lapCache = new Map();
 // Données propres à Suunto (VO2max estimée…) lues dans le fichier FIT d'origine, gardées sur l'appareil
 export async function getSuunto(a) {
-  if (!a || a.source !== 'SUUNTO' && !state.demo) return null;
-  const all = readJSON('ss.suunto', {});
-  if (all[a.id] !== undefined) return all[a.id];
-  let res = null;
-  if (state.demo) res = a.distance ? { vo2max: 57 + (a.id.length % 5) * 0.5 } : null;
-  else {
-    const x = suuntoSummary(await client().file(a.id));
-    res = { vo2max: x.vo2max != null ? Math.round(x.vo2max * 10) / 10 : null, recoverySec: x.recoverySec ?? null };
-  }
-  if (!state.demo) { all[a.id] = res; writeJSON('ss.suunto', all); }
-  return res;
+  if (state.demo) return a?.distance ? { vo2max: 57 + (String(a.id).length % 5) * 0.5 } : null;
+  const f = await getFit(a);
+  return f ? f.summary : null;
 }
 export async function getLaps(actId) {
   if (lapCache.has(actId)) return lapCache.get(actId);
@@ -200,12 +264,25 @@ export async function pushRunSettings(patch) {
 }
 
 // --- Calendrier des courses (Google Sheet) ---
-import { parseRaceSheet, parseCSV, DEFAULT_RACES } from './races.js';
+import { parseRaceSheet, parseRaceRows, parseCSV, DEFAULT_RACES } from './races.js';
 import { parsePlanRows, DEFAULT_PLAN } from './plan.js';
+// Lecture des Google Sheets par le petit script Google (valeurs exactement comme affichées, tous les onglets)
+let scriptPromise = null;
+function loadScript() {
+  const s = settings.get();
+  if (!s.scriptUrl || !canReachNetwork()) return Promise.resolve(null);
+  if (!scriptPromise) scriptPromise = fetch(s.scriptUrl).then(r => { if (!r.ok) throw new Error('script ' + r.status); return r.json(); }).catch(e => { console.warn(e); state.scriptError = String(e.message || e); return null; }).finally(() => setTimeout(() => { scriptPromise = null; }, 5000));
+  return scriptPromise;
+}
 async function loadRaces(cacheOnly = false) {
   const s = settings.get();
   const cached = readJSON('ss.races', null);
   if (cacheOnly && cached) return cached;
+  const js = await loadScript();
+  if (js?.calendrier) {
+    const all = js.calendrier.filter(t => /calendrier|saison|\d{4}\s*\/\s*\d{4}/i.test(t.name)).flatMap(t => parseRaceRows(t.rows, t.name));
+    if (all.some(r => r.date)) { writeJSON('ss.races', all); state.racesSource = 'script'; return all; }
+  }
   if (!s.sheetId || !canReachNetwork()) return cached || DEFAULT_RACES();
   try {
     const tabs = s.sheetTabs.split(',').map(t => t.trim()).filter(Boolean);
@@ -218,7 +295,7 @@ async function loadRaces(cacheOnly = false) {
       if (txt.trim().startsWith('<')) throw new Error('sheet non partagé');
       all.push(...parseRaceSheet(txt, tab));
     }
-    if (all.length) { writeJSON('ss.races', all); state.racesSource = 'sheet'; return all; }
+    if (all.some(r => r.date)) { writeJSON('ss.races', all); state.racesSource = 'sheet'; return all; }
   } catch (e) {
     console.warn('Calendrier Google Sheet indisponible', e);
     state.racesSource = 'fallback';
@@ -239,13 +316,21 @@ export const tests = {
   remove(id) { this.save(this.all().filter(x => x.id !== id)); },
 };
 
-export function clearCache() { localStorage.removeItem(LS.cache); localStorage.removeItem('ss.races'); localStorage.removeItem('ss.plan'); streamCache.clear(); lapCache.clear(); }
+export function clearCache() { localStorage.removeItem('ss.fit'); applyFit._s = null; fitCache.clear(); localStorage.removeItem(LS.cache); localStorage.removeItem('ss.races'); localStorage.removeItem('ss.plan'); streamCache.clear(); lapCache.clear(); }
 
 // --- Plan d'entraînement (Google Sheet, un onglet par semaine) ---
 async function loadPlan(cacheOnly = false) {
   const s = settings.get();
   const cached = readJSON('ss.plan', null);
   if (cacheOnly && cached) return cached;
+  const js = await loadScript();
+  if (js?.plan) {
+    const prefix = (s.planTabPrefix || 'S').toLowerCase();
+    const days = new Map();
+    js.plan.filter(t => t.name.toLowerCase().startsWith(prefix)).forEach(t => parsePlanRows(t.rows).forEach(d => days.set(d.date, d)));
+    const plan = [...days.values()].sort((a, b) => a.date.localeCompare(b.date));
+    if (plan.length) { writeJSON('ss.plan', plan); state.planSource = 'script'; return plan; }
+  }
   if (!s.planSheetId || !canReachNetwork()) return cached || DEFAULT_PLAN();
   try {
     const days = new Map(); let misses = 0;

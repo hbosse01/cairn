@@ -1,6 +1,6 @@
-import { state, getStreams, getLaps, getSuunto } from '../data.js';
+import { state, getStreams, getLaps, getFit, tests, addManualActivity } from '../data.js';
 import { chart, C, gradient, ZONE_COLORS } from '../charts.js';
-import { hrZones, isRun, gapSpeed, gradeFactor } from '../metrics.js';
+import { hrZones, isRun, gapSpeed, gradeFactor, ZONE_NAMES } from '../metrics.js';
 import { esc, fmtDate, fmtTime, fmtKm, fmtDur, fmtChrono, fmtPace, fmtNum, paceFromSpeed, sportCat, typeLabel, ICONS, parseLocal, startOfWeek, isoDate, fmtHours, weekNumber } from '../util.js';
 import { zoneBar, zoneTable, segmented, bindSeg, empty } from './parts.js';
 
@@ -23,7 +23,9 @@ export function renderActivities(el) {
     g.acts.push(a);
   }
   el.innerHTML = `
-    <div class="page-head"><h2>Séances</h2>${segmented('f', FILTERS, filter)}</div>
+    <div class="page-head"><h2>Séances</h2><button class="btn small" id="add-act">+ Ajouter</button></div>
+    ${segmented('f', FILTERS, filter)}
+    <div id="add-form" hidden></div>
     <input class="search" type="search" placeholder="Rechercher une séance…" value="${esc(query)}" aria-label="Rechercher une séance">
     ${!list.length ? empty('Aucune séance ne correspond.') : groups.map(g => {
       const d = parseLocal(g.key);
@@ -36,9 +38,46 @@ export function renderActivities(el) {
     ${list.length > shown ? `<button class="btn ghost wide" id="more">Afficher plus de séances</button>` : ''}
   `;
   bindSeg(el, 'f', v => { filter = v; shown = 40; renderActivities(el); });
+  el.querySelector('#add-act').addEventListener('click', () => showAddForm(el));
   el.querySelector('#more')?.addEventListener('click', () => { shown += 60; renderActivities(el); });
   const s = el.querySelector('.search');
   s.addEventListener('change', () => { query = s.value.trim().toLowerCase(); shown = 40; renderActivities(el); });
+}
+
+// Ajout d'une séance sans montre (home trainer, tapis…) directement dans Intervals.icu
+function showAddForm(el) {
+  const box = el.querySelector('#add-form');
+  if (!box.hidden) { box.hidden = true; return; }
+  const now = new Date();
+  box.hidden = false;
+  box.innerHTML = `<section class="card"><h3>Nouvelle séance</h3>
+    <p class="tiny muted">Pour les séances sans montre. Les séances saisies dans Strava ne peuvent pas arriver dans Cairn (règle de Strava) : saisis-les ici.</p>
+    <form class="form" id="af">
+      <label>Type<select name="type">
+        <option value="VirtualRide">Home trainer</option><option value="VirtualRun">Tapis</option><option value="Run">Course à pied</option><option value="TrailRun">Trail</option>
+        <option value="Ride">Vélo</option><option value="WeightTraining">Musculation</option><option value="Workout">Autre</option></select></label>
+      <label>Nom<input name="name" placeholder="Home trainer Z2"></label>
+      <fieldset><legend>Quand</legend><label>Date<input type="date" name="date" required value="${isoDate(now)}"></label><label>Heure<input type="time" name="time" value="${String(now.getHours()).padStart(2, '0')}:00"></label></fieldset>
+      <fieldset><legend>Effort</legend><label>Durée (h:mm)<input name="dur" required placeholder="0:45"></label><label>Distance (km)<input name="km" inputmode="decimal" placeholder="optionnel"></label><label>FC moyenne<input name="hr" inputmode="numeric" placeholder="optionnel"></label><label>D+ (m)<input name="dplus" inputmode="numeric" placeholder="optionnel"></label></fieldset>
+      <label>Notes<textarea name="notes" rows="2"></textarea></label>
+      <p class="tiny err" id="aerr"></p>
+      <div class="row"><button class="btn" type="submit">Enregistrer la séance</button><button class="btn ghost" type="button" id="acancel">Annuler</button></div>
+    </form></section>`;
+  box.querySelector('#acancel').addEventListener('click', () => { box.hidden = true; });
+  box.querySelector('#af').addEventListener('submit', async e => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target));
+    const m = String(d.dur).trim().match(/^(\d{1,2})(?:[:h](\d{1,2}))?$/);
+    const err = box.querySelector('#aerr');
+    if (!m) { err.textContent = 'Durée au format h:mm, par exemple 0:45 ou 1:30.'; return; }
+    const sec = (+m[1]) * 3600 + (+(m[2] || 0)) * 60;
+    const num = v => v === '' || v == null ? undefined : Number(String(v).replace(',', '.'));
+    const typeName = e.target.type.selectedOptions[0].textContent;
+    const body = { start_date_local: `${d.date}T${d.time || '12:00'}:00`, type: d.type, name: d.name || typeName, moving_time: sec, elapsed_time: sec,
+      distance: num(d.km) != null ? Math.round(num(d.km) * 1000) : undefined, average_heartrate: num(d.hr), total_elevation_gain: num(d.dplus), description: d.notes || undefined };
+    err.textContent = 'Enregistrement…';
+    try { await addManualActivity(body); box.hidden = true; } catch (x) { err.textContent = x.message; }
+  });
 }
 
 function row(a) {
@@ -64,77 +103,137 @@ function row(a) {
 }
 
 export async function renderActivity(el, id) {
-  const a = state.activities.find(x => String(x.id) === String(id));
+  let a = state.activities.find(x => String(x.id) === String(id));
   if (!a) { el.innerHTML = empty('Séance introuvable (elle n\'est peut-être pas encore synchronisée).'); return; }
+  // Séance Suunto : on lit d'abord le fichier de la montre pour avoir ses chiffres exacts
+  let fit = null;
+  if (a.source === 'SUUNTO' && !state.demo) {
+    if (!a._fit) el.innerHTML = `<a class="back" href="#seances">← Séances</a><section class="card"><p class="muted">Lecture des données de ta montre…</p></section>`;
+    try { fit = await getFit(a); a = state.activities.find(x => String(x.id) === String(id)) || a; } catch (e) { console.warn(e); }
+    if (location.hash !== `#seance-${encodeURIComponent(id)}` && location.hash !== `#seance-${id}`) return;
+  }
   const cat = sportCat(a.type);
-  const z = hrZones(a, state.athlete);
   const run = isRun(a);
   const pace = run ? paceFromSpeed(a.average_speed) : null;
-  const paceZ = run && a.pace_zone_times?.length && a.pace_zones?.length ? paceZones(a) : null;
 
   el.innerHTML = `
     <a class="back" href="#seances">← Séances</a>
     <section class="card">
-      <div class="act-head big"><span class="sport-ico s-${cat}">${ICONS[cat]}</span><div><h2>${esc(a.name)}</h2><span class="muted tiny">${typeLabel(a.type)} · ${fmtDate(a.start_date_local, { weekday: true, year: true })} à ${fmtTime(a.start_date_local)}${a.device_name ? ' · ' + esc(a.device_name) : ''}</span></div></div>
+      <div class="act-head big"><span class="sport-ico s-${cat}">${ICONS[cat]}</span><div><h2>${esc(a.name || typeLabel(a.type))}</h2><span class="muted tiny">${typeLabel(a.type)} · ${fmtDate(a.start_date_local, { weekday: true, year: true })} à ${fmtTime(a.start_date_local)}${a.device_name ? ' · ' + esc(a.device_name) : ''}</span></div></div>
       <div class="stat-grid">
         ${a.distance ? st('Distance', `${fmtKm(a.distance, 2)} km`) : ''}
-        ${st('Durée', fmtDur(a.moving_time))}
-        ${a.elapsed_time && a.elapsed_time - a.moving_time > 60 ? st('Temps total', fmtDur(a.elapsed_time)) : ''}
+        ${st('Durée', fmtChrono(a.moving_time))}
+        ${a.elapsed_time && a.elapsed_time - a.moving_time > 30 ? st('Temps total', fmtChrono(a.elapsed_time)) : ''}
         ${pace ? st('Allure moy.', `${fmtPace(pace)}/km`) : ''}
-        ${run ? st('VAP moy.', `<span id="vap-val">${a.gap ? fmtPace(paceFromSpeed(a.gap)) + '/km' : '…'}</span>`) : ''}
+        ${run ? st('VAP moy.', `<i id="vap-val">${a.gap ? fmtPace(paceFromSpeed(a.gap)) + '/km' : '…'}</i>`) : ''}
         ${!run && a.average_speed && a.distance ? st('Vitesse moy.', `${fmtNum(a.average_speed * 3.6, 1)} km/h`) : ''}
         ${a.average_heartrate ? st('FC moy.', `${Math.round(a.average_heartrate)} bpm`) : ''}
         ${a.max_heartrate ? st('FC max', `${Math.round(a.max_heartrate)} bpm`) : ''}
         ${a.distance ? st('D+', `${fmtNum(a.total_elevation_gain || 0)} m`) : ''}
         ${a.distance ? st('D−', `<i id="dminus">${a.total_elevation_loss != null ? fmtNum(a.total_elevation_loss) + ' m' : '…'}</i>`) : ''}
         ${a.average_cadence ? st('Cadence', `${Math.round(run && a.average_cadence < 120 ? a.average_cadence * 2 : a.average_cadence)} pas/min`) : ''}
-        ${a.source === 'SUUNTO' || state.demo ? `<div class="st" id="vo2" hidden><span>VO2max (Suunto)</span><b></b></div>` : ''}
+        ${a.vo2max || fit?.summary?.vo2max ? st('VO2max (Suunto)', `${fmtNum(a.vo2max || fit.summary.vo2max, 1)} <small>ml/kg/min</small>`) : (state.demo && a.distance ? st('VO2max (Suunto)', `57,5 <small>ml/kg/min</small>`) : '')}
         ${a.calories ? st('Calories', `${fmtNum(a.calories)} kcal`) : ''}
       </div>
       ${a.description ? `<p class="desc">${esc(a.description)}</p>` : ''}
     </section>
-
-    ${z ? `<section class="card">${zoneTable(z, { title: 'Temps dans les zones de FC' })}</section>`
-      : `<section class="card"><p class="muted">Pas de données de fréquence cardiaque pour cette séance.</p></section>`}
-
-    ${paceZ ? `<section class="card">${zoneTable(paceZ, { title: 'Temps dans les zones d\'allure' })}</section>` : ''}
-
+    <section class="card" id="hrz"><p class="muted tiny">Chargement…</p></section>
+    ${run ? `<section class="card" id="pz" hidden></section>` : ''}
     <section class="card" id="charts"><p class="muted tiny">Chargement des graphiques…</p></section>
     ${a.distance ? `<section class="card" id="laps"><div class="card-head"><h3>Tours (montre)</h3></div><p class="muted tiny">Chargement…</p></section>` : ''}
     ${run ? `<section class="card" id="splits"><div class="card-head"><h3>Temps au km</h3></div><p class="muted tiny">Chargement…</p></section>` : ''}
   `;
 
-  getSuunto(a).then(x => { const b = el.querySelector('#vo2'); if (b && x?.vo2max) { b.hidden = false; b.querySelector('b').innerHTML = `${fmtNum(x.vo2max, 1)} <small>ml/kg/min</small>`; } }).catch(() => {});
-  if (a.distance) {
-    getLaps(a.id).then(laps => renderLaps(el.querySelector('#laps'), laps, run)).catch(e => { const b = el.querySelector('#laps'); if (b) b.innerHTML = `<div class="card-head"><h3>Tours (montre)</h3></div><p class="muted tiny">Indisponible : ${esc(e.message)}</p>`; });
-  }
+  let s = null;
   try {
-    const s = await getStreams(a.id);
-    if (!el.isConnected || !el.querySelector('#charts')) return;
-    const alt = s.fixed_altitude || s.altitude;
-    if (a.total_elevation_loss == null) { const e = el.querySelector('#dminus'); if (e) { let dn = 0; if (alt) for (let j = 1; j < alt.length; j++) { const x = alt[j] - alt[j - 1]; if (x < 0) dn -= x; } e.textContent = alt ? fmtNum(dn) + ' m' : '–'; } }
+    if (fit) s = { time: fit.streams.timer, elapsed: fit.streams.time, distance: fit.streams.distance, heartrate: fit.streams.heartrate, altitude: fit.streams.altitude, velocity_smooth: fit.streams.speed, pausedBefore: fit.streams.pausedBefore, fromWatch: true };
+    else s = await getStreams(a.id);
+  } catch (e) { console.warn(e); }
+  if (!el.isConnected || !el.querySelector('#charts')) return;
+
+  // Zones FC : calculées sur le temps chrono (pauses exclues) quand on a le fichier montre
+  const zb = a.icu_hr_zones || state.athlete?.run?.hr_zones;
+  const z = s?.fromWatch && zb ? zonesFromStreams(s, zb, state.athlete?.run?.hr_zone_names) : hrZones(a, state.athlete);
+  el.querySelector('#hrz').innerHTML = z ? zoneTable(z, { title: 'Temps dans les zones de FC' }) : `<p class="muted">Pas de données de fréquence cardiaque pour cette séance.</p>`;
+  if (run && s?.velocity_smooth && s?.time) {
+    const pz = paceZonesFromStreams(s, tests.all()[0]);
+    const box = el.querySelector('#pz'); if (pz && box) { box.hidden = false; box.innerHTML = zoneTable(pz, { title: 'Temps dans les zones d\'allure' }); }
+  }
+  if (!s) {
+    el.querySelector('#charts').innerHTML = `<p class="muted tiny">Graphiques indisponibles pour cette séance.</p>`;
+    const b = el.querySelector('#splits'); if (b) b.innerHTML = `<div class="card-head"><h3>Temps au km</h3></div><p class="muted tiny">Indisponible.</p>`;
+  } else {
+    const alt = s.altitude;
+    if (a.total_elevation_loss == null) { const e = el.querySelector('#dminus'); if (e) e.textContent = alt ? fmtNum(climb(alt, -1)) + ' m' : '–'; }
     if (run && !a.gap && s.distance && s.time) { const v = gapSpeed(s, 0, s.distance.length - 1); const e = el.querySelector('#vap-val'); if (e && v) e.textContent = fmtPace(paceFromSpeed(v)) + '/km'; }
     renderCharts(el.querySelector('#charts'), a, s);
     if (run) renderSplits(el.querySelector('#splits'), s);
-  } catch (e) {
-    const c = el.querySelector('#charts'); if (c) c.innerHTML = `<p class="muted tiny">Graphiques indisponibles : ${esc(e.message)}</p>`;
-    const b = el.querySelector('#splits'); if (b) b.innerHTML = `<div class="card-head"><h3>Temps au km</h3></div><p class="muted tiny">Indisponible : ${esc(e.message)}</p>`;
-    const v = el.querySelector('#vap-val'); if (v && v.textContent === '…') v.textContent = '–';
-    const d = el.querySelector('#dminus'); if (d && d.textContent === '…') d.textContent = '–';
+  }
+  const v = el.querySelector('#vap-val'); if (v && v.textContent === '…') v.textContent = '–';
+  const d = el.querySelector('#dminus'); if (d && d.textContent === '…') d.textContent = '–';
+
+  // Tours : ceux de la montre (temps chrono exact) si on a le fichier, sinon ceux d'Intervals.icu
+  if (a.distance) {
+    if (fit?.laps?.length) renderLaps(el.querySelector('#laps'), fit.laps.map(l => ({ distance: l.distance, moving_time: l.timer, average_heartrate: l.avgHr, total_elevation_gain: l.ascent, gap: l.i0 >= 0 && l.i1 > l.i0 ? gapSpeed(s, l.i0, l.i1) : null })), run);
+    else getLaps(a.id).then(laps => renderLaps(el.querySelector('#laps'), laps, run)).catch(e => { const b = el.querySelector('#laps'); if (b) b.innerHTML = `<div class="card-head"><h3>Tours (montre)</h3></div><p class="muted tiny">Indisponible : ${esc(e.message)}</p>`; });
   }
 }
 
 function st(k, v) { return `<div class="st"><span>${k}</span><b>${v}</b></div>`; }
 
-function paceZones(a) {
-  const names = ['Z1', 'Z2', 'Z3', 'Z4', 'Z5a', 'Z5b', 'Z5c'];
-  const tp = a.threshold_pace; // m/s
-  const total = a.pace_zone_times.reduce((s, x) => s + x, 0) || 1;
-  return a.pace_zone_times.map((t, i) => {
-    const loPct = i === 0 ? 0 : a.pace_zones[i - 1], hiPct = a.pace_zones[i];
-    const range = tp ? `${hiPct && hiPct < 900 ? fmtPace(1000 / (tp * hiPct / 100)) : '+'}–${loPct ? fmtPace(1000 / (tp * loPct / 100)) : ''}` : '';
-    return { z: names[i] || `Z${i + 1}`, name: '', t, pct: t / total * 100, lo: null, hi: null, rangeTxt: range };
-  });
+// Dénivelé cumulé avec un seuil de 2 m (évite de compter le bruit du baromètre) ; sign = 1 montée, -1 descente
+function climb(alt, sign = 1, i0 = 0, i1 = alt.length - 1) {
+  let total = 0, ref = null;
+  for (let i = i0; i <= i1; i++) {
+    const v = alt[i]; if (v == null) continue;
+    if (ref == null) { ref = v; continue; }
+    const dlt = (v - ref) * sign;
+    if (dlt >= 2) { total += dlt; ref = v; } else if (dlt <= -2) ref = v;
+  }
+  return total;
+}
+
+// Temps (chrono) passé dans chaque zone FC, calculé point par point
+function zonesFromStreams(s, bounds, names) {
+  const t = s.time, hr = s.heartrate; if (!hr || !t) return null;
+  const acc = new Array(bounds.length).fill(0);
+  for (let i = 1; i < t.length; i++) {
+    if (s.pausedBefore?.[i]) continue;
+    const dt = t[i] - t[i - 1]; if (dt <= 0 || dt > 30 || hr[i] == null) continue;
+    let k = bounds.findIndex(b => hr[i] <= b); if (k < 0) k = bounds.length - 1;
+    acc[k] += dt;
+  }
+  const total = acc.reduce((p, q) => p + q, 0); if (!total) return null;
+  const nm = names || ZONE_NAMES;
+  return acc.map((x, i) => ({ z: `Z${i + 1}`, name: nm[i] || '', t: x, pct: x / total * 100, lo: i === 0 ? 0 : bounds[i - 1] + 1, hi: bounds[i] }));
+}
+
+// Zones d'allure en 6 zones, alignées sur les zones FC et calées sur le dernier test labo
+export function paceBounds(test) {
+  const sv1 = test?.sv1 || { paceMin: 244, paceMax: 250 }, sv2 = test?.sv2 || { paceMin: 208, paceMax: 214 };
+  // bornes en s/km, de la plus lente à la plus rapide
+  const z2slow = Math.round(sv1.paceMax * 1.25);
+  return [
+    { name: 'Récupération', slow: Infinity, fast: z2slow + 1 },
+    { name: 'Endurance fondamentale', slow: z2slow, fast: sv1.paceMax + 1 },
+    { name: 'Endurance active', slow: sv1.paceMax, fast: sv2.paceMax + 1 },
+    { name: 'Seuil', slow: sv2.paceMax, fast: sv2.paceMin },
+    { name: 'VMA', slow: sv2.paceMin - 1, fast: Math.round(sv2.paceMin * 0.9) },
+    { name: 'Anaérobie', slow: Math.round(sv2.paceMin * 0.9) - 1, fast: 0 },
+  ];
+}
+function paceZonesFromStreams(s, test) {
+  const B = paceBounds(test), t = s.time, v = s.velocity_smooth;
+  const acc = new Array(6).fill(0);
+  for (let i = 1; i < t.length; i++) {
+    if (s.pausedBefore?.[i]) continue;
+    const dt = t[i] - t[i - 1]; if (dt <= 0 || dt > 30 || !(v[i] > 0.9)) continue;
+    const p = 1000 / v[i];
+    let k = B.findIndex(b => p <= b.slow && p >= b.fast); if (k < 0) k = p > B[0].fast ? 0 : 5;
+    acc[k] += dt;
+  }
+  const total = acc.reduce((p, q) => p + q, 0); if (!total) return null;
+  return acc.map((x, i) => ({ z: `Z${i + 1}`, name: B[i].name, t: x, pct: x / total * 100, rangeTxt: i === 0 ? `> ${fmtPace(B[0].fast)}` : i === 5 ? `< ${fmtPace(B[5].slow)}` : `${fmtPace(B[i].fast)}–${fmtPace(B[i].slow)}` }));
 }
 
 function splitTable(rows, { first = 'Km' } = {}) {
@@ -161,7 +260,7 @@ function renderLaps(box, laps, run) {
 function renderSplits(box, s) {
   if (!box) return;
   const { distance: d, time: t, heartrate: hr } = s;
-  const alt = s.fixed_altitude || s.altitude;
+  const alt = s.altitude || s.fixed_altitude;
   if (!d || !t) { box.innerHTML = `<div class="card-head"><h3>Temps au km</h3></div><p class="muted tiny">Pas de données GPS pour cette séance.</p>`; return; }
   const splits = []; let k = 1, i0 = 0;
   for (let i = 0; i < d.length; i++) {
@@ -169,7 +268,7 @@ function renderSplits(box, s) {
       const dd = d[i] - d[i0]; if (dd < 200) break;
       const dt = t[i] - t[i0];
       const hrs = hr ? hr.slice(i0, i + 1).filter(Boolean) : [];
-      let up = null; if (alt) { up = 0; for (let j = i0 + 1; j <= i; j++) { const x = alt[j] - alt[j - 1]; if (x > 0) up += x; } }
+      const up = alt ? climb(alt, 1, i0, i) : null;
       const g = gapSpeed(s, i0, i);
       const last = i === d.length - 1;
       splits.push({ label: last && dd < 950 ? fmtNum(dd / 1000, 2) : String(k), pace: dt / (dd / 1000), gap: g ? 1000 / g : null, hr: hrs.length ? hrs.reduce((a, b) => a + b, 0) / hrs.length : null, up });
@@ -213,6 +312,11 @@ function renderCharts(box, a, s) {
   const grade = alt && dist ? idx.map((i, k) => { let j = k; while (j > 0 && dist[i] - dist[idx[j]] < 40) j--; const dd = dist[i] - dist[idx[j]]; return dd > 10 ? (alt[i] - alt[idx[j]]) / dd * 100 : 0; }) : null;
   // VAP instantanée
   const gapS = paceS && grade ? paceS.map((p, k) => p ? p / gradeFactor(grade[k] / 100) : null) : null;
+  // coupures aux pauses de la montre : pas de trait entre avant et après la pause
+  if (s.pausedBefore) {
+    const cut = idx.map((i, k) => { if (k === 0) return false; for (let j = idx[k - 1] + 1; j <= i; j++) if (s.pausedBefore[j]) return true; return false; });
+    [altS, hrS, paceS, spdS, gapS].forEach(arr => { if (arr) cut.forEach((c, k) => { if (c) arr[k] = null; }); });
+  }
 
   const valid = arr => arr.filter(v => v != null && isFinite(v));
   const avgPace = run ? (a.average_speed ? 1000 / a.average_speed : null) : null;
@@ -270,7 +374,7 @@ function renderCharts(box, a, s) {
     charts.push(chart(box.querySelector('#s-hr'), {
       type: 'line',
       data: { datasets: [
-        { data: pts(hrS), borderColor: '#ff6178', borderWidth: 1.4, pointRadius: 0, spanGaps: true, backgroundColor: gradient('#ff6178', 0.22, 0), fill: 'start' },
+        { data: pts(hrS), borderColor: '#ff6178', borderWidth: 1.4, pointRadius: 0, spanGaps: false, backgroundColor: gradient('#ff6178', 0.22, 0), fill: 'start' },
         { data: [{ x: 0, y: avgHr }, { x: xMax, y: avgHr }], borderColor: 'rgba(238,243,246,0.55)', borderDash: [4, 4], borderWidth: 1, pointRadius: 0 },
       ] },
       options: { ...common, scales: { x: xScale, y: { ...fixY, min: lo, max: hi, ticks: { maxTicksLimit: 5, callback: v => v + ' bpm' } } } },
@@ -289,7 +393,7 @@ function renderCharts(box, a, s) {
       data = pts(spdS); avgLine = (a.average_speed || 0) * 3.6;
     }
     const ds = [
-      { data, borderColor: C.blue, borderWidth: 1.4, pointRadius: 0, spanGaps: true, yAxisID: 'y', order: 1 },
+      { data, borderColor: C.blue, borderWidth: 1.4, pointRadius: 0, spanGaps: false, yAxisID: 'y', order: 1 },
       { data: [{ x: 0, y: avgLine }, { x: xMax, y: avgLine }], borderColor: 'rgba(238,243,246,0.55)', borderDash: [4, 4], borderWidth: 1, pointRadius: 0, yAxisID: 'y', order: 1 },
     ];
     const scales = { x: xScale, y: yOpt };

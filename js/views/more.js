@@ -193,12 +193,19 @@ export function renderSettings(el) {
     <section class="card"><h3>Google Sheets (courses et plan)</h3>
       <p class="muted">L'app lit ton calendrier de courses et ton plan d'entraînement dans Google Sheets. Pour la synchro automatique, chaque Sheet doit être partagé en lecture : <b>Partager → Accès général → « Tous les utilisateurs disposant du lien » → Lecteur</b>.</p>
       <form class="form" id="rf">
+        <label>Lien du script Google (recommandé)<input name="scriptUrl" value="${esc(s.scriptUrl || '')}" placeholder="https://script.google.com/macros/s/…/exec"></label>
+        <p class="tiny muted">Avec le script, l'app lit tous les onglets exactement comme tu les vois, y compris les nouvelles saisons et les nouvelles semaines.</p>
         <label>ID du Google Sheet<input name="sheetId" value="${esc(s.sheetId)}"></label>
         <label>Onglets à lire (séparés par des virgules)<input name="sheetTabs" value="${esc(s.sheetTabs)}"></label>
         <label>ID du Google Sheet du plan<input name="planSheetId" value="${esc(s.planSheetId)}"></label>
         <label>Préfixe des onglets semaine<input name="planTabPrefix" value="${esc(s.planTabPrefix)}" placeholder="S (pour S01, S02…)"></label>
         <div class="row"><button class="btn" type="submit">Enregistrer</button></div>
       </form>
+    </section>
+    <section class="card"><h3>Diagnostic</h3>
+      <p class="muted">En cas de souci, affiche le diagnostic, copie-le et envoie-le à Claude.</p>
+      <div class="row wrap"><button class="btn ghost" id="diag">Afficher le diagnostic</button><button class="btn ghost" id="diagcopy" hidden>Copier</button></div>
+      <pre id="diagout" class="diag" hidden></pre>
     </section>
     <section class="card"><h3>Données</h3>
       <div class="row wrap">
@@ -209,7 +216,7 @@ export function renderSettings(el) {
       <textarea id="io" rows="4" hidden placeholder="Colle ici l'export de tes tests puis appuie à nouveau sur « Importer »"></textarea>
       <p class="tiny muted" id="dmsg"></p>
     </section>
-    <p class="tiny muted center">Cairn · version Alpenglow du 9 nov. · données Suunto & Strava via Intervals.icu</p>`;
+    <p class="tiny muted center">Cairn · version du 9 nov. (2) · données Suunto & Strava via Intervals.icu</p>`;
   el.querySelector('#sf').addEventListener('submit', async e => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(e.target));
@@ -221,10 +228,14 @@ export function renderSettings(el) {
   el.querySelector('#rf').addEventListener('submit', async e => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(e.target));
-    settings.set({ sheetId: d.sheetId.trim(), sheetTabs: d.sheetTabs, planSheetId: d.planSheetId.trim(), planTabPrefix: d.planTabPrefix.trim() || 'S' });
+    settings.set({ scriptUrl: (d.scriptUrl || '').trim(), sheetId: d.sheetId.trim(), sheetTabs: d.sheetTabs, planSheetId: d.planSheetId.trim(), planTabPrefix: d.planTabPrefix.trim() || 'S' });
     localStorage.removeItem('ss.races'); localStorage.removeItem('ss.plan'); await load();
     location.hash = '#planning';
   });
+  el.querySelector('#diag').addEventListener('click', () => {
+    const out = el.querySelector('#diagout'); out.hidden = false; out.textContent = diagnostic(); el.querySelector('#diagcopy').hidden = false;
+  });
+  el.querySelector('#diagcopy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(el.querySelector('#diagout').textContent); el.querySelector('#diagcopy').textContent = 'Copié'; } catch { el.querySelector('#diagcopy').textContent = 'Sélectionne le texte pour le copier'; } });
   el.querySelector('#resync').addEventListener('click', async () => { el.querySelector('#dmsg').textContent = 'Téléchargement de tout l\'historique…'; clearCache(); await load({ force: true }); el.querySelector('#dmsg').textContent = state.error || 'Terminé.'; });
   el.querySelector('#export').addEventListener('click', async () => {
     const txt = JSON.stringify(tests.all());
@@ -236,4 +247,33 @@ export function renderSettings(el) {
     if (io.hidden || !io.value.trim()) { io.hidden = false; io.value = ''; io.focus(); return; }
     try { const l = JSON.parse(io.value); if (!Array.isArray(l)) throw 0; tests.save(l); el.querySelector('#dmsg').textContent = `${l.length} test(s) importé(s).`; } catch { el.querySelector('#dmsg').textContent = 'Texte invalide.'; }
   });
+}
+
+// Résumé technique (sans clé API) pour diagnostiquer à distance
+function diagnostic() {
+  const s = settings.get();
+  const acts = state.activities || [];
+  const by = {}; acts.forEach(a => { const k = `${a.source || '?'}/${a.type || '?'}`; by[k] = (by[k] || 0) + 1; });
+  const fit = (() => { try { return JSON.parse(localStorage.getItem('ss.fit') || '{}'); } catch { return {}; } })();
+  const w = (state.wellness || []).slice(-3).map(x => ({ id: x.id, sleep: x.sleepSecs, score: x.sleepScore, hrv: x.hrv, rhr: x.restingHR, steps: x.steps, updated: x.updated }));
+  const t = today();
+  const races = (state.races || []);
+  const up = races.filter(r => r.date && parseLocal(r.date) >= t && !r.cancelled).slice(0, 3).map(r => `${r.date} ${r.titre} (${r.dateTxt})`);
+  const plan = state.plan || [];
+  const lines = [
+    `Cairn diagnostic — ${new Date().toISOString()}`,
+    `mode: ${state.demo ? 'démo' : 'réel'} · clé: ${s.apiKey ? 'oui' : 'non'} · athlète: ${s.athleteId} · synchro: ${state.updated ? new Date(state.updated).toISOString() : '–'}`,
+    `erreur: ${state.error || 'aucune'}`,
+    `séances: ${acts.length} · dernières: ${acts.slice(0, 3).map(a => `${a.start_date_local} ${a.type} ${a.source}${a._fit ? ' (montre)' : ''}`).join(' | ')}`,
+    `par source/type: ${Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([k, v]) => `${k}=${v}`).join(', ')}`,
+    `séances Strava non transmises: ${(state.stravaStubs || []).length} · dernières: ${(state.stravaStubs || []).slice(0, 3).map(a => a.start_date_local).join(', ')}`,
+    `fichiers montre lus: ${Object.values(fit).filter(Boolean).length} (échecs ${Object.values(fit).filter(x => x === false).length})`,
+    `santé (3 derniers jours): ${JSON.stringify(w)}`,
+    `courses: ${races.length} (source ${state.racesSource || 'copie'}) · à venir: ${up.join(' | ') || 'aucune'}`,
+    `exemples bruts: ${races.slice(0, 3).map(r => `[${r.dateTxt}]`).join(' ')}`,
+    `plan: ${plan.length} jours (source ${state.planSource || 'copie'}) · du ${plan[0]?.date || '–'} au ${plan[plan.length - 1]?.date || '–'}`,
+    `script: ${s.scriptUrl ? 'renseigné' : 'non'} ${state.scriptError ? '· erreur ' + state.scriptError : ''}`,
+    `appareil: ${navigator.userAgent}`,
+  ];
+  return lines.join('\n');
 }

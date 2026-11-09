@@ -56,7 +56,7 @@ export function renderVolume(el) {
       <div class="card-head"><h3>Cumul ${y} au ${fmtDate(t)}</h3></div>
       <div class="week-stats">
         <div class="ws"><span class="ws-k">Km course</span><span class="ws-v">${fmtNum(cy.km)} km</span><span class="ws-d ${cy.km >= py.km ? 'up' : 'down'}">${y - 1} : ${fmtNum(py.km)} km</span></div>
-        <div class="ws"><span class="ws-k">Temps (tous sports)</span><span class="ws-v">${fmtNum(cy.sec / 3600)} h</span><span class="ws-d">${y - 1} : ${fmtNum(py.sec / 3600)} h</span></div>
+        <div class="ws"><span class="ws-k">Temps (tous sports)</span><span class="ws-v">${fmtHours(cy.sec)}</span><span class="ws-d">${y - 1} : ${fmtHours(py.sec)}</span></div>
         <div class="ws"><span class="ws-k">D+ course</span><span class="ws-v">${fmtNum(cy.dplus)} m</span><span class="ws-d">${y - 1} : ${fmtNum(py.dplus)} m</span></div>
       </div>
     </section>

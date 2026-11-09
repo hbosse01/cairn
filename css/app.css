@@ -295,3 +295,5 @@ small { font-size: 0.72em; color: var(--brume); font-weight: 500; font-family: v
 .an-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
 .an-title b { font-family: var(--display); font-size: 19px; font-weight: 700; }
 .an-title span { font-size: 12.5px; color: var(--brume); }
+.form select { background: var(--roche-2); border: 1px solid var(--arete); color: var(--neige); border-radius: 12px; padding: 12px 13px; font: inherit; font-size: 15px; width: 100%; }
+.diag { white-space: pre-wrap; word-break: break-word; font-size: 11.5px; background: var(--roche-2); border-radius: 12px; padding: 12px; color: var(--brume); max-height: 360px; overflow: auto; }

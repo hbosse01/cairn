@@ -70,7 +70,7 @@ export function recovery(wellness) {
   if (last.sleepSecs && sleepM) {
     const diff = (last.sleepSecs - sleepM) / 3600;
     score += Math.max(-1.5, Math.min(1, diff)); n += 1;
-    signals.push({ k: 'Sommeil', v: fmtHours(last.sleepSecs), ref: `moy. ${(sleepM / 3600).toFixed(1).replace('.', ',')} h`, s: diff < -1.2 ? 'bad' : diff < -0.5 ? 'warn' : 'good' });
+    signals.push({ k: 'Sommeil', v: fmtHours(last.sleepSecs), ref: `moy. ${fmtHours(sleepM)}`, s: diff < -1.2 ? 'bad' : diff < -0.5 ? 'warn' : 'good' });
   }
   if (last.steps != null) signals.push({ k: 'Pas', v: last.steps.toLocaleString('fr-FR'), ref: (() => { const m = mean(win.map(w => w.steps)); return m ? `moy. ${Math.round(m).toLocaleString('fr-FR')}` : ''; })(), s: 'neutral' });
   const norm = n ? score / n : 0;
